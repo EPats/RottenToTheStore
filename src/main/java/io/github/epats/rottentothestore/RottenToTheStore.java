@@ -2,6 +2,7 @@ package io.github.epats.rottentothestore;
 
 import com.mojang.logging.LogUtils;
 import io.github.epats.rottentothecore.common.message.MessageRegistry;
+import io.github.epats.rottentothestore.common.ItemRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.api.distmarker.Dist;
@@ -37,6 +38,8 @@ public class RottenToTheStore
 
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
+
+        ItemRegistry.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
