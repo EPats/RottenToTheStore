@@ -24,7 +24,7 @@ public class CommonForgeEventHandler {
     }
 
     @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
-    public static void onEvent(PlayerEvent.PlayerChangeGameModeEvent event) {
+    public static void onGamemodeChange(PlayerEvent.PlayerChangeGameModeEvent event) {
         RottenToTheStore.LOGGER.info("hi");
         Player player = event.getEntity();
         ItemBlankSlot.fillOrRemoveBlankSlots(player,
@@ -32,8 +32,9 @@ public class CommonForgeEventHandler {
     }
 
     @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
-    public static void onEvent(LivingDropsEvent event) {
+    public static void onLivingDrops(LivingDropsEvent event) {
         Collection<ItemEntity> c = event.getDrops();
         c.removeIf(i -> i.getItem().getItem() == ItemRegistry.BLANK_SLOT.get());
     }
+
 }
