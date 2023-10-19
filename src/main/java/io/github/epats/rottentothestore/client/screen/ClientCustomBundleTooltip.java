@@ -12,6 +12,9 @@ import net.minecraft.world.item.ItemStack;
 
 public class ClientCustomBundleTooltip implements ClientTooltipComponent {
     public static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/gui/container/bundle.png");
+    private static final int SLOT_WIDTH = 18;
+    private static final int SLOT_HEIGHT = 20;
+    private static final int BORDER_SIZE = 1;
     private final NonNullList<ItemStack> items;
     private final int weight;
     private final int maxWeight;
@@ -25,24 +28,24 @@ public class ClientCustomBundleTooltip implements ClientTooltipComponent {
     }
 
     public int getHeight() {
-        return gridSizeY() * 20 + 2 + 4;
+        return gridRows() * SLOT_HEIGHT + 2 + 4;
     }
 
     public int getWidth(Font font) {
-        return gridSizeX() * 18 + 2;
+        return gridColumns() * SLOT_WIDTH + 2;
     }
 
     public void renderImage(Font font, int x, int y, GuiGraphics guiGraphics) {
-        int columns = gridSizeX();
-        int rows = gridSizeY();
+        int columns = gridColumns();
+        int rows = gridRows();
         boolean isBlocked = weight >= maxWeight;
         int slot = 0;
 
         for (int row = 0; row < rows; ++row) {
             for (int col = 0; col < columns; ++col) {
-                int xPos = x + col * 18 + 1;
-                int yPos = y + row * 20 + 1;
-                renderSlot(xPos, yPos, slot++, isBlocked || row * columns + col + 1 > size, font, guiGraphics);
+                int xPos = x + col * SLOT_WIDTH + BORDER_SIZE;
+                int yPos = y + row * SLOT_HEIGHT + BORDER_SIZE;
+                renderSlot(xPos, yPos, slot++, isBlocked || row * columns + col + BORDER_SIZE > size, font, guiGraphics);
             }
         }
 
@@ -55,30 +58,30 @@ public class ClientCustomBundleTooltip implements ClientTooltipComponent {
         } else {
             ItemStack itemStack = items.get(slot);
             blit(guiGraphics, x, y, Texture.SLOT);
-            guiGraphics.renderItem(itemStack, x + 1, y + 1, slot);
-            guiGraphics.renderItemDecorations(font, itemStack, x + 1, y + 1);
+            guiGraphics.renderItem(itemStack, x + BORDER_SIZE, y + BORDER_SIZE, slot);
+            guiGraphics.renderItemDecorations(font, itemStack, x + BORDER_SIZE, y + BORDER_SIZE);
             if (slot == 0) {
-                AbstractContainerScreen.renderSlotHighlight(guiGraphics, x + 1, y + 1, 0);
+                AbstractContainerScreen.renderSlotHighlight(guiGraphics, x + BORDER_SIZE, y + BORDER_SIZE, 0);
             }
         }
     }
 
     private void drawBorder(int x, int y, int columns, int rows, GuiGraphics guiGraphics) {
         blit(guiGraphics, x, y, Texture.BORDER_CORNER_TOP);
-        blit(guiGraphics, x + columns * 18 + 1, y, Texture.BORDER_CORNER_TOP);
+        blit(guiGraphics, x + columns * SLOT_WIDTH + BORDER_SIZE, y, Texture.BORDER_CORNER_TOP);
 
         for (int col = 0; col < columns; ++col) {
-            blit(guiGraphics, x + 1 + col * 18, y, Texture.BORDER_HORIZONTAL_TOP);
-            blit(guiGraphics, x + 1 + col * 18, y + rows * 20, Texture.BORDER_HORIZONTAL_BOTTOM);
+            blit(guiGraphics, x + BORDER_SIZE + col * SLOT_WIDTH, y, Texture.BORDER_HORIZONTAL_TOP);
+            blit(guiGraphics, x + BORDER_SIZE + col * SLOT_WIDTH, y + rows * SLOT_HEIGHT, Texture.BORDER_HORIZONTAL_BOTTOM);
         }
 
         for (int row = 0; row < rows; ++row) {
-            blit(guiGraphics, x, y + row * 20 + 1, Texture.BORDER_VERTICAL);
-            blit(guiGraphics, x + columns * 18 + 1, y + row * 20 + 1, Texture.BORDER_VERTICAL);
+            blit(guiGraphics, x, y + row * SLOT_HEIGHT + BORDER_SIZE, Texture.BORDER_VERTICAL);
+            blit(guiGraphics, x + columns * SLOT_WIDTH + BORDER_SIZE, y + row * SLOT_HEIGHT + BORDER_SIZE, Texture.BORDER_VERTICAL);
         }
 
-        blit(guiGraphics, x, y + rows * 20, Texture.BORDER_CORNER_BOTTOM);
-        blit(guiGraphics, x + columns * 18 + 1, y + rows * 20, Texture.BORDER_CORNER_BOTTOM);
+        blit(guiGraphics, x, y + rows * SLOT_HEIGHT, Texture.BORDER_CORNER_BOTTOM);
+        blit(guiGraphics, x + columns * SLOT_WIDTH + BORDER_SIZE, y + rows * SLOT_HEIGHT, Texture.BORDER_CORNER_BOTTOM);
     }
 
     private void blit(GuiGraphics guiGraphics, int x, int y, Texture texture) {
@@ -87,22 +90,22 @@ public class ClientCustomBundleTooltip implements ClientTooltipComponent {
         guiGraphics.blit(TEXTURE_LOCATION, x, y, 0, (float) texture.x, (float) texture.y, texture.w, texture.h, 128, 128);
     }
 
-    private int gridSizeX() {
+    private int gridColumns() {
         return (int) Math.ceil(Math.sqrt(size));
     }
 
-    private int gridSizeY() {
-        return (int) Math.ceil((float) size / gridSizeX());
+    private int gridRows() {
+        return (int) Math.ceil((float) size / gridColumns());
     }
 
     enum Texture {
-        SLOT(0, 0, 18, 20),
-        BLOCKED_SLOT(0, 40, 18, 20),
-        BORDER_VERTICAL(0, 18, 1, 20),
-        BORDER_HORIZONTAL_TOP(0, 20, 18, 1),
-        BORDER_HORIZONTAL_BOTTOM(0, 60, 18, 1),
-        BORDER_CORNER_TOP(0, 20, 1, 1),
-        BORDER_CORNER_BOTTOM(0, 60, 1, 1);
+        SLOT(0, 0, SLOT_WIDTH, SLOT_HEIGHT),
+        BLOCKED_SLOT(0, 40, SLOT_WIDTH, SLOT_HEIGHT),
+        BORDER_VERTICAL(0, SLOT_WIDTH, BORDER_SIZE, SLOT_HEIGHT),
+        BORDER_HORIZONTAL_TOP(0, SLOT_HEIGHT, SLOT_WIDTH, BORDER_SIZE),
+        BORDER_HORIZONTAL_BOTTOM(0, 60, SLOT_WIDTH, BORDER_SIZE),
+        BORDER_CORNER_TOP(0, SLOT_HEIGHT, BORDER_SIZE, BORDER_SIZE),
+        BORDER_CORNER_BOTTOM(0, 60, BORDER_SIZE, BORDER_SIZE);
 
         public final int x;
         public final int y;

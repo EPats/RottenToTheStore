@@ -17,17 +17,17 @@ import java.util.List;
 import java.util.Optional;
 
 public class ItemBundle extends Item {
-    private int size;
+    private int numberOfSlots;
     private int maxWeight;
 
-    public ItemBundle(Properties prop, int size, int maxWeight) {
+    public ItemBundle(Properties prop, int numberOfSlots, int maxWeight) {
         super(prop);
-        this.size = size;
+        this.numberOfSlots = numberOfSlots;
         this.maxWeight = maxWeight;
     }
 
-    public int getSize() {
-        return this.size;
+    public int getNumberOfSlots() {
+        return this.numberOfSlots;
     }
 
     public int getMaxWeight() {
@@ -35,12 +35,12 @@ public class ItemBundle extends Item {
     }
 
     public float getFullnessDisplay(ItemStack pStack) {
-        return (float) InventoryHelper.getContentWeight(pStack) / ((float) maxWeight);
+        return (float) InventoryHelper.getWeightOfBagContents(pStack) / ((float) maxWeight);
     }
 
     @Override
     public boolean overrideStackedOnOther(ItemStack bundle, Slot slot, ClickAction action, Player player) {
-        return InventoryHelper.stackMeOn(bundle, slot, action, player, this.maxWeight);
+        return InventoryHelper.bagItemStackedOnSlot(bundle, slot, action, player, this.maxWeight, this.numberOfSlots);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class ItemBundle extends Item {
 
     @Override
     public Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
-        return InventoryHelper.getToolTipImage(stack, this.size);
+        return InventoryHelper.getToolTipImage(stack, this.numberOfSlots);
     }
 
     /**
