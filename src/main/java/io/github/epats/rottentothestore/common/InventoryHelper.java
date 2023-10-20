@@ -31,7 +31,7 @@ public class InventoryHelper {
 
     public static int getWeightOfSingleItemFromItemStack(ItemStack itemStack) {
         if(!itemStack.getItem().canFitInsideContainerItems())
-            return 65;
+            return Integer.MAX_VALUE;
         if ((itemStack.is(Items.BEEHIVE) || itemStack.is(Items.BEE_NEST)) && itemStack.hasTag()) {
             CompoundTag compoundtag = BlockItem.getBlockEntityData(itemStack);
             if (compoundtag != null && !compoundtag.getList("Bees", 10).isEmpty()) {
@@ -183,7 +183,7 @@ public class InventoryHelper {
         boolean canBeLoadedIn = canBagFitItemIn(bagItemStack, itemStackedOn, maxWeight, numberOfSlots);
         boolean canBeUnloadedOn = canBagUnloadOn(bagItemStack, itemStackedOn);
 
-        if(!isSpace && !canBeLoadedIn && !canBeUnloadedOn && !itemStackedOn.isEmpty())
+        if (!isSpace && !canBeLoadedIn && !canBeUnloadedOn && !itemStackedOn.isEmpty())
             return false;
 
         if (itemStackedOn.isEmpty()) {
@@ -208,6 +208,8 @@ public class InventoryHelper {
                 playRemoveOneSound(player);
             });
             return optional.isPresent();
+        } else if(!canBeLoadedIn) {
+            return false;
         } else {
             boolean insertItemStackIntoBag = insertItemStackIntoBag(bagItemStack, itemStackedOn, maxWeight);
             if (insertItemStackIntoBag) {
@@ -215,6 +217,60 @@ public class InventoryHelper {
             }
             return insertItemStackIntoBag;
         }
+    }
+
+
+    public static boolean itemStackedOnBag(ItemStack bagItemStack, ItemStack heldItemStack, Slot slot, ClickAction action, Player player,
+                                           SlotAccess slotAccess, int maxWeight, int numberOfSlots) {
+
+        if(action != ClickAction.SECONDARY || !slot.allowModification(player))
+            return false;
+
+        if (!heldItemStack.getItem().canFitInsideContainerItems())
+            return false;
+
+        boolean isSpace = hasSpaceInBag(bagItemStack, heldItemStack, maxWeight, numberOfSlots);
+        boolean canBeLoadedIn = canBagFitItemIn(bagItemStack, heldItemStack, maxWeight, numberOfSlots);
+        boolean canUnloadFrom = canBagUnloadOn(bagItemStack, heldItemStack);
+
+        if (!isSpace && !canBeLoadedIn && !canUnloadFrom && !heldItemStack.isEmpty())
+            return false;
+
+        if(heldItemStack.isEmpty()) {
+            Optional<ItemStack> optional = removeLastInsertedItemStack(bagItemStack);
+            optional.ifPresent((removedItemStack) -> {
+                playRemoveOneSound(player);
+                slotAccess.set(removedItemStack);
+            });
+            return optional.isPresent();
+        }
+        else if (!isSpace && canUnloadFrom) {
+            Optional<CompoundTag> optional = getMatchingItemStack(heldItemStack, bagItemStack);
+
+            optional.ifPresent(itemTag -> {
+                CompoundTag bagTag = bagItemStack.getOrCreateTag();
+                ListTag itemListTag = bagTag.getList(TAG_ITEMS, 10);
+                itemListTag.remove(itemTag);
+                ItemStack removedItemStack = ItemStack.of(itemTag);
+                int growAmount = Math.min(removedItemStack.getCount(), heldItemStack.getMaxStackSize() - heldItemStack.getCount());
+                heldItemStack.grow(growAmount);
+                removedItemStack.shrink(growAmount);
+                if(removedItemStack.getCount() > 0)
+                    addItemStackToBag(bagItemStack, removedItemStack, maxWeight);
+                playRemoveOneSound(player);
+            });
+            return optional.isPresent();
+        } else if(!canBeLoadedIn) {
+            return false;
+        } else {
+            boolean insertItemStackIntoBag = insertItemStackIntoBag(bagItemStack, heldItemStack, maxWeight);
+            if (insertItemStackIntoBag) {
+                playInsertSound(player);
+            }
+            return insertItemStackIntoBag;
+        }
+
+
     }
 
     private static boolean insertItemStackIntoBag(ItemStack bagItemStack, ItemStack itemStackedOn, int maxWeight) {
@@ -238,12 +294,12 @@ public class InventoryHelper {
         int bagCurrentWeight = getWeightOfBagContents(bagItemStack);
         if(bagCurrentWeight >= maxWeight)
             return false;
-        if(getWeightOfSingleItemFromItemStack(itemStackedIn) >= maxWeight - bagCurrentWeight)
+        if(getWeightOfSingleItemFromItemStack(itemStackedIn) > maxWeight - bagCurrentWeight)
             return false;
         boolean canStackWith = getContentsFromBag(bagItemStack).anyMatch(itemStack ->
                 stackCanStackWith(itemStack, itemStackedIn) && !itemStackedIn.isEmpty());
 
-        return getContentsFromBag(bagItemStack).count() + (canStackWith ? 1 : 0) <= numberOfSlots;
+        return getContentsFromBag(bagItemStack).count() + (canStackWith ? 0 : 1) <= numberOfSlots;
     }
 
     private static boolean canBagUnloadOn(ItemStack bagItemStack, ItemStack itemStackedOn) {
@@ -255,32 +311,6 @@ public class InventoryHelper {
         return ItemStack.isSameItemSameTags(stack1, stack2) && stack1.getCount() < stack1.getMaxStackSize();
     }
 
-
-
-    public static boolean stackOnMe(ItemStack bundle, ItemStack itemIn, Slot slot, ClickAction action, Player player,
-                                    SlotAccess slotAccess, int maxWeight) {
-        boolean ret = false;
-        if (action == ClickAction.SECONDARY && slot.allowModification(player)) {
-            boolean isSpace = getContentsFromBag(bundle).anyMatch(stack -> stack.getItem() == itemIn.getItem())
-                    || 2 - getContentsFromBag(bundle).count() > 0;
-            if (itemIn.isEmpty()) {
-                Optional<ItemStack> optional = removeLastInsertedItemStack(bundle);
-                optional.ifPresent((p_186347_) -> {
-                    playRemoveOneSound(player);
-                    slotAccess.set(p_186347_);
-                });
-                ret = optional.isPresent();
-            } else if(isSpace) {
-                int i = addItemStackToBag(bundle, itemIn, maxWeight);
-                if (i > 0) {
-                    playInsertSound(player);
-                    itemIn.shrink(i);
-                    ret = true;
-                }
-            }
-        }
-        return ret;
-    }
 
     public static void onDestroyed(ItemEntity pItemEntity) {
         ItemUtils.onContainerDestroyed(pItemEntity, getContentsFromBag(pItemEntity.getItem()));

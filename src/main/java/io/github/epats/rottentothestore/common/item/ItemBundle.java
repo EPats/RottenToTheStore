@@ -46,7 +46,7 @@ public class ItemBundle extends Item {
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack bundle, ItemStack itemIn, Slot slot, ClickAction action,
                                             Player player, SlotAccess slotAccess) {
-        return InventoryHelper.stackOnMe(bundle, itemIn, slot, action, player, slotAccess, this.maxWeight);
+        return InventoryHelper.itemStackedOnBag(bundle, itemIn, slot, action, player, slotAccess, this.maxWeight, this.numberOfSlots);
     }
 
     @Override
