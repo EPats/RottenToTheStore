@@ -51,7 +51,7 @@ public class ItemBundle extends Item {
 
     @Override
     public Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
-        return InventoryHelper.getToolTipImage(stack, this.numberOfSlots);
+        return InventoryHelper.getToolTipImage(stack, this.numberOfSlots, this.maxWeight);
     }
 
     /**

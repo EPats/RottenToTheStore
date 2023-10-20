@@ -47,9 +47,7 @@ public class InventoryHelper {
     }
 
     public static int getWeightOfBagContents(ItemStack bagItemStack) {
-        return getContentsFromBag(bagItemStack).mapToInt((itemStack) ->
-                getWeightOfWholeItemStack(itemStack))
-                .sum();
+        return getContentsFromBag(bagItemStack).mapToInt(InventoryHelper::getWeightOfWholeItemStack).sum();
     }
 
     public static int addItemStackToBag(ItemStack bagItemStack, ItemStack insertedItemStack, int bagMaxWeight) {
@@ -67,13 +65,11 @@ public class InventoryHelper {
             return 0;
 
         Optional<CompoundTag> matchingItemTag = getMatchingItemWithSpace(insertedItemStack, itemListTag);
+        ListTag newItemListTag = matchingItemTag.map(
+                compoundTag -> addItemWithExistingInBag(insertedItemStack, itemListTag, maxInsertableCount, compoundTag))
+                .orElseGet(() -> addNewItemToBag(insertedItemStack, itemListTag, maxInsertableCount));
 
-        if (matchingItemTag.isPresent()) {
-            itemListTag = addItemWithExistingInBag(insertedItemStack, itemListTag, maxInsertableCount, matchingItemTag.get());
-        } else {
-            itemListTag = addNewItemToBag(insertedItemStack, itemListTag, maxInsertableCount);
-        }
-        bagTag.put(TAG_ITEMS, itemListTag);
+        bagTag.put(TAG_ITEMS, newItemListTag);
         return maxInsertableCount;
     }
 
@@ -95,12 +91,14 @@ public class InventoryHelper {
         itemListTag.remove(existingItemTag);
         existingItemStack.grow(addToStackAmount);
         existingItemStack.save(existingItemTag);
+
+        ListTag newItemListTag = itemListTag.copy();
         if(leftoverStackAmount > 0)
-            itemListTag = addNewItemToBag(new ItemStack(insertedItemStack.getItem(), leftoverStackAmount), itemListTag, leftoverStackAmount);
+            newItemListTag = addNewItemToBag(new ItemStack(insertedItemStack.getItem(), leftoverStackAmount), itemListTag, leftoverStackAmount);
 
         insertedItemStack.shrink(maxInsertableCount);
-        itemListTag.add(0, existingItemTag);
-        return itemListTag;
+        newItemListTag.add(0, existingItemTag);
+        return newItemListTag;
     }
 
     public static Optional<CompoundTag> getMatchingItemWithSpace(ItemStack itemStackToMatch, ListTag itemListTag) {
@@ -146,13 +144,13 @@ public class InventoryHelper {
             return false;
 
         if(!player.level().isClientSide())
-            dropContentsInWorld(bagItemStack, player, bagTag);
+            dropContentsInWorld(player, bagTag);
 
         bagItemStack.removeTagKey(TAG_ITEMS);
         return true;
     }
 
-    public static void dropContentsInWorld(ItemStack bagItemStack, Player player, CompoundTag bagTag) {
+    public static void dropContentsInWorld(Player player, CompoundTag bagTag) {
         ListTag listtag = bagTag.getList(TAG_ITEMS, 10);
 
         for (int i = 0; i < listtag.size(); ++i) {
@@ -184,13 +182,11 @@ public class InventoryHelper {
         boolean isSpace = hasSpaceInBag(bagItemStack, itemStackedOn, maxWeight, numberOfSlots);
         boolean canBeLoadedIn = canBagFitItemIn(bagItemStack, itemStackedOn, maxWeight, numberOfSlots);
         boolean canBeUnloadedOn = canBagUnloadOn(bagItemStack, itemStackedOn);
-        System.out.println("isSpace: " + isSpace + "; canBeUnloadedOn:" +canBeUnloadedOn + "; canBeLoadedIn: " +canBeLoadedIn);
 
         if(!isSpace && !canBeLoadedIn && !canBeUnloadedOn && !itemStackedOn.isEmpty())
             return false;
 
         if (itemStackedOn.isEmpty()) {
-            System.out.println(1);
             Optional<ItemStack> optional = removeLastInsertedItemStack(bagItemStack);
 
             optional.ifPresent(itemStack -> {
@@ -200,7 +196,6 @@ public class InventoryHelper {
             });
             return optional.isPresent();
         } else if (!isSpace && canBeUnloadedOn) {
-            System.out.println(2);
             Optional<CompoundTag> optional = getMatchingItemStack(itemStackedOn, bagItemStack);
 
             optional.ifPresent(itemTag -> {
@@ -214,7 +209,6 @@ public class InventoryHelper {
             });
             return optional.isPresent();
         } else {
-            System.out.println(3);
             boolean insertItemStackIntoBag = insertItemStackIntoBag(bagItemStack, itemStackedOn, maxWeight);
             if (insertItemStackIntoBag) {
                 playInsertSound(player);
@@ -232,11 +226,9 @@ public class InventoryHelper {
     }
 
     private static boolean hasSpaceInBag(ItemStack bagItemStack, ItemStack itemStackedOn, int maxWeight, int numberOfSlots) {
-        if(!(bagItemStack.getItem() instanceof ItemBundle))
+        if(!(bagItemStack.getItem() instanceof ItemBundle) || maxWeight <= getWeightOfBagContents(bagItemStack))
             return false;
-        ItemBundle bagItem = (ItemBundle) bagItemStack.getItem();
-        if(maxWeight <= getWeightOfBagContents(bagItemStack))
-            return false;
+
         return getContentsFromBag(bagItemStack).anyMatch(itemStack ->
                 stackCanStackWith(itemStack, itemStackedOn))
                 || (numberOfSlots - getContentsFromBag(bagItemStack).count()) > 0;
@@ -251,9 +243,7 @@ public class InventoryHelper {
         boolean canStackWith = getContentsFromBag(bagItemStack).anyMatch(itemStack ->
                 stackCanStackWith(itemStack, itemStackedIn) && !itemStackedIn.isEmpty());
 
-        if(getContentsFromBag(bagItemStack).count() + (canStackWith ? 1 : 0) > numberOfSlots)
-            return false;
-        return true;
+        return getContentsFromBag(bagItemStack).count() + (canStackWith ? 1 : 0) <= numberOfSlots;
     }
 
     private static boolean canBagUnloadOn(ItemStack bagItemStack, ItemStack itemStackedOn) {
@@ -310,13 +300,9 @@ public class InventoryHelper {
                 0.8F + pEntity.level().getRandom().nextFloat() * 0.4F);
     }
 
-    public static Optional<TooltipComponent> getToolTipImage(ItemStack stack, int size) {
+    public static Optional<TooltipComponent> getToolTipImage(ItemStack stack, int size, int maxWeight) {
         NonNullList<ItemStack> nonnulllist = NonNullList.create();
         getContentsFromBag(stack).forEach(nonnulllist::add);
-        int maxWeight = 64;
-        if(stack.getItem() instanceof BundleItem bundle) {
-            maxWeight = bundle.MAX_WEIGHT;
-        }
         return Optional.of(new CustomBundleTooltip(nonnulllist, getWeightOfBagContents(stack), maxWeight, size));
     }
 
