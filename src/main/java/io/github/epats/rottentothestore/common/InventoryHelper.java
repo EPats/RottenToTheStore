@@ -2,11 +2,11 @@ package io.github.epats.rottentothestore.common;
 
 
 import io.github.epats.rottentothestore.common.inventory.tooltip.CustomBundleTooltip;
+import io.github.epats.rottentothestore.common.item.ItemBundle;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -69,10 +69,8 @@ public class InventoryHelper {
         Optional<CompoundTag> matchingItemTag = getMatchingItemWithSpace(insertedItemStack, itemListTag);
 
         if (matchingItemTag.isPresent()) {
-            System.out.println(5);
             itemListTag = addItemWithExistingInBag(insertedItemStack, itemListTag, maxInsertableCount, matchingItemTag.get());
         } else {
-            System.out.println(6);
             itemListTag = addNewItemToBag(insertedItemStack, itemListTag, maxInsertableCount);
         }
         bagTag.put(TAG_ITEMS, itemListTag);
@@ -94,7 +92,6 @@ public class InventoryHelper {
         int addToStackAmount = Math.min(existingItemStack.getMaxStackSize() - existingItemStack.getCount(), maxInsertableCount);
 
         int leftoverStackAmount = maxInsertableCount - addToStackAmount;
-        System.out.println("leftoverStackAmount: " + leftoverStackAmount + ";maxInsertableCount: "+maxInsertableCount+"; addToStackAmount:"+addToStackAmount);
         itemListTag.remove(existingItemTag);
         existingItemStack.grow(addToStackAmount);
         existingItemStack.save(existingItemTag);
@@ -114,22 +111,21 @@ public class InventoryHelper {
                 ).findFirst();
     }
 
-    private static Optional<ItemStack> getMatchingItemStack(ItemStack itemStackToMatch, ItemStack bagItemStack) {
+    private static Optional<CompoundTag> getMatchingItemStack(ItemStack itemStackToMatch, ItemStack bagItemStack) {
         return bagItemStack.getOrCreateTag().getList(TAG_ITEMS, 10)
                 .stream().filter(CompoundTag.class::isInstance).map(CompoundTag.class::cast)
-                .map(compoundTag -> ItemStack.of(compoundTag))
-                .filter((itemStack) ->
-                        ItemStack.isSameItemSameTags(itemStack, itemStackToMatch)
+                .filter((itemTag) ->
+                        ItemStack.isSameItemSameTags(ItemStack.of(itemTag), itemStackToMatch)
                 ).findFirst();
     }
 
     public static Optional<ItemStack> removeLastInsertedItemStack(ItemStack bagItemStack) {
-        CompoundTag compoundtag = bagItemStack.getOrCreateTag();
+        CompoundTag bagTag = bagItemStack.getOrCreateTag();
 
-        if (!compoundtag.contains(TAG_ITEMS))
+        if (!bagTag.contains(TAG_ITEMS))
             return Optional.empty();
 
-        ListTag listtag = compoundtag.getList(TAG_ITEMS, 10);
+        ListTag listtag = bagTag.getList(TAG_ITEMS, 10);
         if (listtag.isEmpty())
             return Optional.empty();
 
@@ -185,10 +181,12 @@ public class InventoryHelper {
         if (!itemStackedOn.getItem().canFitInsideContainerItems())
             return false;
 
-        boolean isSpace = hasSpaceInBag(bagItemStack, itemStackedOn, numberOfSlots);
-        boolean canBeStackedOn = canBagStackOnItemStack(bagItemStack, itemStackedOn);
+        boolean isSpace = hasSpaceInBag(bagItemStack, itemStackedOn, maxWeight, numberOfSlots);
+        boolean canBeLoadedIn = canBagFitItemIn(bagItemStack, itemStackedOn, maxWeight, numberOfSlots);
+        boolean canBeUnloadedOn = canBagUnloadOn(bagItemStack, itemStackedOn);
+        System.out.println("isSpace: " + isSpace + "; canBeUnloadedOn:" +canBeUnloadedOn + "; canBeLoadedIn: " +canBeLoadedIn);
 
-        if(!isSpace && !canBeStackedOn)
+        if(!isSpace && !canBeLoadedIn && !canBeUnloadedOn && !itemStackedOn.isEmpty())
             return false;
 
         if (itemStackedOn.isEmpty()) {
@@ -198,42 +196,69 @@ public class InventoryHelper {
             optional.ifPresent(itemStack -> {
                 ItemStack leftoverItemStack = slot.safeInsert(itemStack);
                 addItemStackToBag(bagItemStack, leftoverItemStack, maxWeight);
+                playRemoveOneSound(player);
             });
-        } else if (!isSpace && canBeStackedOn) {
+            return optional.isPresent();
+        } else if (!isSpace && canBeUnloadedOn) {
             System.out.println(2);
-            Optional<ItemStack> optional = getMatchingItemStack(itemStackedOn, bagItemStack);
+            Optional<CompoundTag> optional = getMatchingItemStack(itemStackedOn, bagItemStack);
 
-            optional.ifPresent(itemStack -> {
+            optional.ifPresent(itemTag -> {
+                CompoundTag bagTag = bagItemStack.getOrCreateTag();
+                ListTag itemListTag = bagTag.getList(TAG_ITEMS, 10);
+                itemListTag.remove(itemTag);
+                ItemStack itemStack = ItemStack.of(itemTag);
                 ItemStack leftoverItemStack = slot.safeInsert(itemStack);
                 addItemStackToBag(bagItemStack, leftoverItemStack, maxWeight);
+                playRemoveOneSound(player);
             });
+            return optional.isPresent();
         } else {
             System.out.println(3);
             boolean insertItemStackIntoBag = insertItemStackIntoBag(bagItemStack, itemStackedOn, maxWeight);
             if (insertItemStackIntoBag) {
                 playInsertSound(player);
             }
+            return insertItemStackIntoBag;
         }
-        return true;
     }
 
     private static boolean insertItemStackIntoBag(ItemStack bagItemStack, ItemStack itemStackedOn, int maxWeight) {
         int availableWeight = maxWeight - getWeightOfBagContents(bagItemStack);
         int maxInsertCount = availableWeight / getWeightOfSingleItemFromItemStack(itemStackedOn);
         int actualInsertCount = addItemStackToBag(bagItemStack, itemStackedOn, maxWeight);
-        System.out.println("availableWeight: "+availableWeight+"; maxInsertCount:"+maxInsertCount+"; actualInsertCount"+actualInsertCount);
+
         return Math.min(actualInsertCount, maxInsertCount) > 0;
     }
 
-    private static boolean hasSpaceInBag(ItemStack bagItemStack, ItemStack itemStackedOn, int numberOfSlots) {
+    private static boolean hasSpaceInBag(ItemStack bagItemStack, ItemStack itemStackedOn, int maxWeight, int numberOfSlots) {
+        if(!(bagItemStack.getItem() instanceof ItemBundle))
+            return false;
+        ItemBundle bagItem = (ItemBundle) bagItemStack.getItem();
+        if(maxWeight <= getWeightOfBagContents(bagItemStack))
+            return false;
         return getContentsFromBag(bagItemStack).anyMatch(itemStack ->
                 stackCanStackWith(itemStack, itemStackedOn))
                 || (numberOfSlots - getContentsFromBag(bagItemStack).count()) > 0;
     }
 
-    private static boolean canBagStackOnItemStack(ItemStack bagItemStack, ItemStack itemStackedOn) {
+    private static boolean canBagFitItemIn(ItemStack bagItemStack, ItemStack itemStackedIn, int maxWeight, int numberOfSlots) {
+        int bagCurrentWeight = getWeightOfBagContents(bagItemStack);
+        if(bagCurrentWeight >= maxWeight)
+            return false;
+        if(getWeightOfSingleItemFromItemStack(itemStackedIn) >= maxWeight - bagCurrentWeight)
+            return false;
+        boolean canStackWith = getContentsFromBag(bagItemStack).anyMatch(itemStack ->
+                stackCanStackWith(itemStack, itemStackedIn) && !itemStackedIn.isEmpty());
+
+        if(getContentsFromBag(bagItemStack).count() + (canStackWith ? 1 : 0) > numberOfSlots)
+            return false;
+        return true;
+    }
+
+    private static boolean canBagUnloadOn(ItemStack bagItemStack, ItemStack itemStackedOn) {
         return getContentsFromBag(bagItemStack).anyMatch(itemStack ->
-                stackCanStackWith(itemStack, itemStackedOn) && !itemStackedOn.isEmpty());
+                stackCanStackWith(itemStackedOn, itemStack) && !itemStackedOn.isEmpty());
     }
 
     private static boolean stackCanStackWith(ItemStack stack1, ItemStack stack2) {
@@ -247,9 +272,7 @@ public class InventoryHelper {
         boolean ret = false;
         if (action == ClickAction.SECONDARY && slot.allowModification(player)) {
             boolean isSpace = getContentsFromBag(bundle).anyMatch(stack -> stack.getItem() == itemIn.getItem())
-                    || 2 - getContentsFromBag(bundle).mapToInt(stack -> {
-                return 1;
-            }).sum() > 0;
+                    || 2 - getContentsFromBag(bundle).count() > 0;
             if (itemIn.isEmpty()) {
                 Optional<ItemStack> optional = removeLastInsertedItemStack(bundle);
                 optional.ifPresent((p_186347_) -> {
