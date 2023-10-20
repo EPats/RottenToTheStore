@@ -69,21 +69,41 @@ public class InventoryHelper {
         Optional<CompoundTag> matchingItemTag = getMatchingItemWithSpace(insertedItemStack, itemListTag);
 
         if (matchingItemTag.isPresent()) {
-            CompoundTag existingItemTag = matchingItemTag.get();
-            ItemStack existingItemStack  = ItemStack.of(existingItemTag);
-            existingItemStack.grow(maxInsertableCount);
-            existingItemStack.save(existingItemTag);
-            itemListTag.remove(existingItemTag);
-            itemListTag.add(0, existingItemTag);
+            System.out.println(5);
+            itemListTag = addItemWithExistingInBag(insertedItemStack, itemListTag, maxInsertableCount, matchingItemTag.get());
         } else {
-            ItemStack newItemStack  = insertedItemStack.copy();
-            newItemStack.setCount(maxInsertableCount);
-            CompoundTag newItemTag  = new CompoundTag();
-            newItemStack.save(newItemTag );
-            itemListTag.add(0, newItemTag );
+            System.out.println(6);
+            itemListTag = addNewItemToBag(insertedItemStack, itemListTag, maxInsertableCount);
         }
-
+        bagTag.put(TAG_ITEMS, itemListTag);
         return maxInsertableCount;
+    }
+
+    private static ListTag addNewItemToBag(ItemStack insertedItemStack, ListTag itemListTag, int maxInsertableCount) {
+        ItemStack newItemStack = insertedItemStack.copy();
+        newItemStack.setCount(maxInsertableCount);
+        CompoundTag newItemTag = newItemStack.save(new CompoundTag());
+        insertedItemStack.shrink(maxInsertableCount);
+        itemListTag.add(0, newItemTag);
+        return itemListTag;
+    }
+
+    private static ListTag addItemWithExistingInBag(ItemStack insertedItemStack, ListTag itemListTag, int maxInsertableCount, CompoundTag existingItemTag) {
+        ItemStack existingItemStack = ItemStack.of(existingItemTag);
+
+        int addToStackAmount = Math.min(existingItemStack.getMaxStackSize() - existingItemStack.getCount(), maxInsertableCount);
+
+        int leftoverStackAmount = maxInsertableCount - addToStackAmount;
+        System.out.println("leftoverStackAmount: " + leftoverStackAmount + ";maxInsertableCount: "+maxInsertableCount+"; addToStackAmount:"+addToStackAmount);
+        itemListTag.remove(existingItemTag);
+        existingItemStack.grow(addToStackAmount);
+        existingItemStack.save(existingItemTag);
+        if(leftoverStackAmount > 0)
+            itemListTag = addNewItemToBag(new ItemStack(insertedItemStack.getItem(), leftoverStackAmount), itemListTag, leftoverStackAmount);
+
+        insertedItemStack.shrink(maxInsertableCount);
+        itemListTag.add(0, existingItemTag);
+        return itemListTag;
     }
 
     public static Optional<CompoundTag> getMatchingItemWithSpace(ItemStack itemStackToMatch, ListTag itemListTag) {
@@ -162,9 +182,7 @@ public class InventoryHelper {
             return false;
 
         ItemStack itemStackedOn = slot.getItem();
-
-        if (!itemStackedOn.isEmpty() ||
-                !itemStackedOn.getItem().canFitInsideContainerItems())
+        if (!itemStackedOn.getItem().canFitInsideContainerItems())
             return false;
 
         boolean isSpace = hasSpaceInBag(bagItemStack, itemStackedOn, numberOfSlots);
@@ -174,6 +192,7 @@ public class InventoryHelper {
             return false;
 
         if (itemStackedOn.isEmpty()) {
+            System.out.println(1);
             Optional<ItemStack> optional = removeLastInsertedItemStack(bagItemStack);
 
             optional.ifPresent(itemStack -> {
@@ -181,6 +200,7 @@ public class InventoryHelper {
                 addItemStackToBag(bagItemStack, leftoverItemStack, maxWeight);
             });
         } else if (!isSpace && canBeStackedOn) {
+            System.out.println(2);
             Optional<ItemStack> optional = getMatchingItemStack(itemStackedOn, bagItemStack);
 
             optional.ifPresent(itemStack -> {
@@ -188,6 +208,7 @@ public class InventoryHelper {
                 addItemStackToBag(bagItemStack, leftoverItemStack, maxWeight);
             });
         } else {
+            System.out.println(3);
             boolean insertItemStackIntoBag = insertItemStackIntoBag(bagItemStack, itemStackedOn, maxWeight);
             if (insertItemStackIntoBag) {
                 playInsertSound(player);
@@ -200,19 +221,19 @@ public class InventoryHelper {
         int availableWeight = maxWeight - getWeightOfBagContents(bagItemStack);
         int maxInsertCount = availableWeight / getWeightOfSingleItemFromItemStack(itemStackedOn);
         int actualInsertCount = addItemStackToBag(bagItemStack, itemStackedOn, maxWeight);
-
+        System.out.println("availableWeight: "+availableWeight+"; maxInsertCount:"+maxInsertCount+"; actualInsertCount"+actualInsertCount);
         return Math.min(actualInsertCount, maxInsertCount) > 0;
     }
 
     private static boolean hasSpaceInBag(ItemStack bagItemStack, ItemStack itemStackedOn, int numberOfSlots) {
         return getContentsFromBag(bagItemStack).anyMatch(itemStack ->
-                stackCanStackWith(itemStack, itemStackedOn)
-                || (numberOfSlots - getContentsFromBag(bagItemStack).count()) > 0);
+                stackCanStackWith(itemStack, itemStackedOn))
+                || (numberOfSlots - getContentsFromBag(bagItemStack).count()) > 0;
     }
 
     private static boolean canBagStackOnItemStack(ItemStack bagItemStack, ItemStack itemStackedOn) {
         return getContentsFromBag(bagItemStack).anyMatch(itemStack ->
-                stackCanStackWith(itemStack, itemStackedOn));
+                stackCanStackWith(itemStack, itemStackedOn) && !itemStackedOn.isEmpty());
     }
 
     private static boolean stackCanStackWith(ItemStack stack1, ItemStack stack2) {

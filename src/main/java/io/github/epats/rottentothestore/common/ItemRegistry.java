@@ -18,7 +18,7 @@ public class ItemRegistry {
             () -> new ItemBlankSlot(new Item.Properties().stacksTo(1)));
 
     public static final RegistryObject<Item> GRASS_BUNDLE = ITEMS.register("grass_bundle",
-            () -> new ItemBundle(new Item.Properties().stacksTo(1), 2, 32));
+            () -> new ItemBundle(new Item.Properties().stacksTo(1), 6, 128));
 
     public static void register(IEventBus modBus) {
         ITEMS.register(modBus);
