@@ -2,6 +2,7 @@ package io.github.epats.rottentothestore;
 
 import com.mojang.logging.LogUtils;
 import io.github.epats.rottentothecore.common.message.MessageRegistry;
+import io.github.epats.rottentothestore.common.CreativeModeTabRegistry;
 import io.github.epats.rottentothestore.common.ItemRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.block.Blocks;
@@ -40,6 +41,7 @@ public class RottenToTheStore
         modEventBus.addListener(this::commonSetup);
 
         ItemRegistry.register(modEventBus);
+        CreativeModeTabRegistry.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);

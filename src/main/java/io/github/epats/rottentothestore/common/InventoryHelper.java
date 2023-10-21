@@ -269,8 +269,6 @@ public class InventoryHelper {
             }
             return insertItemStackIntoBag;
         }
-
-
     }
 
     private static boolean insertItemStackIntoBag(ItemStack bagItemStack, ItemStack itemStackedOn, int maxWeight) {

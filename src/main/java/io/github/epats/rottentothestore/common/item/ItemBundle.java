@@ -15,37 +15,52 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
-public class ItemBundle extends Item {
+public class ItemBundle extends Item implements StorageItem {
     private int numberOfSlots;
     private int maxWeight;
+    private Predicate<ItemStack> canAcceptItem;
 
-    public ItemBundle(Properties prop, int numberOfSlots, int maxWeight) {
+    public ItemBundle(Properties prop, int numberOfSlots, int maxWeight, Predicate<ItemStack> itemRestrictions) {
         super(prop);
         this.numberOfSlots = numberOfSlots;
         this.maxWeight = maxWeight;
+        this.canAcceptItem = itemRestrictions;
     }
 
+    @Override
     public int getNumberOfSlots() {
         return this.numberOfSlots;
     }
 
+    @Override
     public int getMaxWeight() {
         return this.maxWeight;
     }
 
+    @Override
     public float getFullnessDisplay(ItemStack pStack) {
         return (float) InventoryHelper.getWeightOfBagContents(pStack) / ((float) maxWeight);
     }
 
     @Override
+    public boolean canBagTakeItem(ItemStack stackToInsert) {
+        return this.canAcceptItem.test(stackToInsert);
+    }
+
+    @Override
     public boolean overrideStackedOnOther(ItemStack bundle, Slot slot, ClickAction action, Player player) {
+        if(!this.canBagTakeItem(slot.getItem()))
+            return false;
         return InventoryHelper.bagItemStackedOnSlot(bundle, slot, action, player, this.maxWeight, this.numberOfSlots);
     }
 
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack bundle, ItemStack itemIn, Slot slot, ClickAction action,
                                             Player player, SlotAccess slotAccess) {
+        if(!itemIn.isEmpty() && !this.canBagTakeItem(itemIn))
+            return false;
         return InventoryHelper.itemStackedOnBag(bundle, itemIn, slot, action, player, slotAccess, this.maxWeight, this.numberOfSlots);
     }
 
@@ -91,6 +106,11 @@ public class ItemBundle extends Item {
     @Override
     public int getBarColor(ItemStack pStack) {
         return InventoryHelper.getFullnessBarColor(pStack);
+    }
+
+    @Override
+    public boolean canFitInsideContainerItems() {
+        return false;
     }
 
 //    /**
