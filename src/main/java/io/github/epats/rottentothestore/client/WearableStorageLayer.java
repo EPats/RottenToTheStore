@@ -67,7 +67,7 @@ public class WearableStorageLayer<EntityT extends LivingEntity, ModelT extends H
                 this.model.copyPropertiesThrough();
 
                 poseStack.translate(0D, 0.2D, 0.22D);
-                poseStack.mulPose(Axis.ZN.rotationDegrees(40));
+//                poseStack.mulPose(Axis.ZN.rotationDegrees(40));
                 boolean flag1 = chestItem.hasFoil();
                 if (armorItem instanceof net.minecraft.world.item.DyeableLeatherItem) {
                     int i = ((net.minecraft.world.item.DyeableLeatherItem) armorItem).getColor(chestItem);
@@ -114,7 +114,11 @@ public class WearableStorageLayer<EntityT extends LivingEntity, ModelT extends H
                              float g, float b, LivingEntity livingEntity, Boolean customColour) {
         VertexConsumer vertexConsumer = ItemRenderer.getArmorFoilBuffer(pBuffer,
                 RenderType.armorCutoutNoCull(BACKPACK_TEXTURE), false, foil);
-        BackpackParts[] parts = { BackpackParts.BUNDLE_BACK, BackpackParts.BUNDLE_BACK_STRAP, BackpackParts.BUNDLE_SIDE, BackpackParts.BUNDLE_SIDE_STRAP, BackpackParts.BACKPACK_MAIN};
+        BackpackParts[] parts = {
+//                BackpackParts.BUNDLE_BACK, BackpackParts.BUNDLE_BACK_STRAP,
+                BackpackParts.BUNDLE_SIDE, BackpackParts.BUNDLE_SIDE_STRAP
+//                BackpackParts.BACKPACK_MAIN
+        };
         this.renderModel(pPoseStack, vertexConsumer, pBuffer, packedLight, r, g, b, customColour, parts);
     }
 
