@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.entity.LivingEntity;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class WearableStorageModel<EntityT extends LivingEntity> extends HumanoidModel<EntityT> {
@@ -84,9 +83,9 @@ public class WearableStorageModel<EntityT extends LivingEntity> extends Humanoid
 
         leftLeg.addOrReplaceChild(BUNDLE_SIDE, CubeListBuilder.create()
                         .texOffs(0, 0)
-                        .addBox(2.5F, 10F, -4F, 4F, 4F, 4F, CubeDeformation.NONE)
+                        .addBox(3F, 9F, -4F, 4F, 4F, 4F, CubeDeformation.NONE)
                         .texOffs(16, 4)
-                        .addBox(2.5F, 8F, -3F, 2F, 2F, 2F, CubeDeformation.NONE),
+                        .addBox(3F, 7F, -3.5F, 2F, 2F, 3F, CubeDeformation.NONE),
                         PartPose.offset(1.9F, 0.0F, 0.0F));
 
 
@@ -94,7 +93,7 @@ public class WearableStorageModel<EntityT extends LivingEntity> extends Humanoid
 
         body.addOrReplaceChild(BUNDLE_SIDE_STRAP, CubeListBuilder.create()
                 .texOffs(0, 8)
-                .addBox(-4.2F, 6.5F, -5F, 8.4F, 2F, 4.5F, CubeDeformation.NONE),
+                .addBox(-4.2F, 6.5F, -5.8F, 8.4F, 2F, 4.8F, CubeDeformation.NONE),
                 PartPose.offset(0.0F, 0.0F, 0.0F));
 
         body.addOrReplaceChild(BUNDLE_BACK, CubeListBuilder.create().texOffs(0, 0).addBox(-2.5F, -0.75F, -1.5F, 5.0F, 5.0F, 4.0F, new CubeDeformation(0.0F))
@@ -164,13 +163,18 @@ public class WearableStorageModel<EntityT extends LivingEntity> extends Humanoid
         });
     }
 
-    public void copyPropertiesThrough() {
+    public void copyPropertiesThrough(boolean crouching) {
         this.body.getChild(BACKPACK_MAIN).copyFrom(this.body);
         this.body.getChild(BUNDLE_BACK).copyFrom(this.body);
         this.body.getChild(BUNDLE_BACK_STRAP).copyFrom(this.body);
         this.body.getChild(BUNDLE_SIDE_STRAP).copyFrom(this.body);
+        if(crouching) {
+            this.body.getChild(BUNDLE_SIDE_STRAP).y -= 2F;
+            this.body.getChild(BUNDLE_SIDE_STRAP).z += 1.2F;
+        }
 
         this.leftLeg.getChild(BUNDLE_SIDE).copyFrom(this.body);
         this.leftLeg.getChild(BUNDLE_SIDE).xRot += this.leftLeg.xRot * 0.15F;
     }
+
 }

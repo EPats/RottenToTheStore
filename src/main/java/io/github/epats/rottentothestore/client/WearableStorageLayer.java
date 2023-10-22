@@ -21,9 +21,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class WearableStorageLayer<EntityT extends LivingEntity, ModelT extends HumanoidModel<EntityT>>
         extends RenderLayer<EntityT, ModelT> {
 
@@ -64,7 +61,7 @@ public class WearableStorageLayer<EntityT extends LivingEntity, ModelT extends H
             if (armorItem.getEquipmentSlot() == EquipmentSlot.CHEST) {
 
                 this.getParentModel().copyPropertiesTo(model);
-                this.model.copyPropertiesThrough();
+                this.model.copyPropertiesThrough(livingEntity.isCrouching());
 
                 poseStack.translate(0D, 0.2D, 0.22D);
 //                poseStack.mulPose(Axis.ZN.rotationDegrees(40));
@@ -89,7 +86,7 @@ public class WearableStorageLayer<EntityT extends LivingEntity, ModelT extends H
             if (armorItem.getEquipmentSlot() == EquipmentSlot.LEGS) {
 
                 this.getParentModel().copyPropertiesTo(model);
-                this.model.copyPropertiesThrough();
+                this.model.copyPropertiesThrough(livingEntity.isCrouching());
 
                 poseStack.translate(0D, 0.2D, 0.22D);
                 poseStack.mulPose(Axis.ZN.rotationDegrees(40));
