@@ -84,18 +84,18 @@ public class WearableStorageModel<EntityT extends LivingEntity> extends Humanoid
 
         leftLeg.addOrReplaceChild(BUNDLE_SIDE, CubeListBuilder.create()
                         .texOffs(0, 0)
-                        .addBox(1.5F, -3F, -4F, 4F, 4F, 4F, CubeDeformation.NONE)
+                        .addBox(2.5F, 10F, -4F, 4F, 4F, 4F, CubeDeformation.NONE)
                         .texOffs(16, 4)
-                        .addBox(1.5F, -4F, -3F, 2F, 2F, 2F, CubeDeformation.NONE),
-                        PartPose.offset(1.5F, 64.0F, 0.0F));
+                        .addBox(2.5F, 8F, -3F, 2F, 2F, 2F, CubeDeformation.NONE),
+                        PartPose.offset(1.9F, 0.0F, 0.0F));
 
 
         PartDefinition body = parentDefinition.getChild("body");
 
         body.addOrReplaceChild(BUNDLE_SIDE_STRAP, CubeListBuilder.create()
                 .texOffs(0, 8)
-                .addBox(-4.2F, 2F, -5F, 8.4F, 2F, 4.5F, new CubeDeformation(0.0F)),
-                PartPose.offset(0.0F, 64.0F, 0.0F));
+                .addBox(-4.2F, 6.5F, -5F, 8.4F, 2F, 4.5F, CubeDeformation.NONE),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
 
         body.addOrReplaceChild(BUNDLE_BACK, CubeListBuilder.create().texOffs(0, 0).addBox(-2.5F, -0.75F, -1.5F, 5.0F, 5.0F, 4.0F, new CubeDeformation(0.0F))
                 .texOffs(0, 0).addBox(-1.5F, -2.75F, -0.5F, 3.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 64.0F, 0.0F));
@@ -168,8 +168,9 @@ public class WearableStorageModel<EntityT extends LivingEntity> extends Humanoid
         this.body.getChild(BACKPACK_MAIN).copyFrom(this.body);
         this.body.getChild(BUNDLE_BACK).copyFrom(this.body);
         this.body.getChild(BUNDLE_BACK_STRAP).copyFrom(this.body);
-        this.leftLeg.getChild(BUNDLE_SIDE).copyFrom(this.leftLeg);
         this.body.getChild(BUNDLE_SIDE_STRAP).copyFrom(this.body);
-        this.leftLeg.getChild(BUNDLE_SIDE).xRot *= 1F;
+
+        this.leftLeg.getChild(BUNDLE_SIDE).copyFrom(this.body);
+        this.leftLeg.getChild(BUNDLE_SIDE).xRot += this.leftLeg.xRot * 0.15F;
     }
 }
