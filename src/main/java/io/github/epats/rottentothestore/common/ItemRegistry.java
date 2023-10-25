@@ -1,8 +1,11 @@
 package io.github.epats.rottentothestore.common;
 
 import io.github.epats.rottentothestore.RottenToTheStore;
+import io.github.epats.rottentothestore.client.WearableStorageLayer;
 import io.github.epats.rottentothestore.common.item.ItemBlankSlot;
 import io.github.epats.rottentothestore.common.item.ItemBundle;
+import io.github.epats.rottentothestore.common.item.WearableTest;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
@@ -11,9 +14,13 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.github.epats.rottentothestore.common.CreativeModeTabRegistry.addItemToTab;
 
@@ -42,6 +49,24 @@ public class ItemRegistry {
     public static final RegistryObject<Item> ICE_BUNDLE =
             createBag("ice_bundle", DEFAULT_BAG_PROPERTIES, 4, 64 * 4,
                     (itemStack -> itemStack.isEmpty() || itemStack.getItem().isEdible()));
+
+    public static final RegistryObject<WearableTest> TEST = addItemToTab(ITEMS.register("test",
+            () -> new WearableTest(new Item.Properties()
+                    , new EquipmentSlot[]{EquipmentSlot.CHEST, EquipmentSlot.LEGS}
+                    , slot -> {
+                        if(slot == EquipmentSlot.CHEST) {
+                            return new WearableStorageLayer.BagParts[]{
+                                    WearableStorageLayer.BagParts.BUNDLE_BACK_STRAP,
+                                    WearableStorageLayer.BagParts.BUNDLE_BACK};
+                        } else if(slot == EquipmentSlot.LEGS) {
+                            return new WearableStorageLayer.BagParts[]{
+                                    WearableStorageLayer.BagParts.BUNDLE_SIDE_STRAP,
+                                    WearableStorageLayer.BagParts.BUNDLE_SIDE};
+                        } else {
+                            return new WearableStorageLayer.BagParts[0];
+                        }
+                     }))
+                    , CreativeModeTabRegistry.BAG_TAB_ITEMS);
 
     public static void register(IEventBus modBus) {
         ITEMS.register(modBus);
