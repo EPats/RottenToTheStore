@@ -56,7 +56,7 @@ public class ItemRegistry {
                     , slot -> {
                         if(slot == EquipmentSlot.CHEST) {
                             return new WearableStorageLayer.BagParts[]{
-                                    WearableStorageLayer.BagParts.BUNDLE_BACK_STRAP,
+//                                    WearableStorageLayer.BagParts.BUNDLE_BACK_STRAP,
                                     WearableStorageLayer.BagParts.BUNDLE_BACK};
                         } else if(slot == EquipmentSlot.LEGS) {
                             return new WearableStorageLayer.BagParts[]{

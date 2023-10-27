@@ -30,7 +30,7 @@ public class WearableStorageModel<EntityT extends LivingEntity> extends Humanoid
     private static final String BACKPACK_BUTTON_TOP = "backpack_button_top";
 
     private static final String BUNDLE_BACK = "bundle_back";
-    private static final String BUNDLE_BACK_STRAP = "bundle_back_strap";
+//    private static final String BUNDLE_BACK_STRAP = "bundle_back_strap";
     private static final String BUNDLE_SIDE = "bundle_side";
     private static final String BUNDLE_SIDE_STRAP = "bundle_side_strap";
 
@@ -60,7 +60,7 @@ public class WearableStorageModel<EntityT extends LivingEntity> extends Humanoid
 
         ImmutableMap.Builder<BagParts, ModelPart> builder = ImmutableMap.builder();
         builder.put(BagParts.BUNDLE_BACK, part.getChild("body").getChild(BUNDLE_BACK));
-        builder.put(BagParts.BUNDLE_BACK_STRAP, part.getChild("body").getChild(BUNDLE_BACK_STRAP));
+//        builder.put(BagParts.BUNDLE_BACK_STRAP, part.getChild("body").getChild(BUNDLE_BACK_STRAP));
         builder.put(BagParts.BACKPACK_MAIN, part.getChild("body").getChild(BACKPACK_MAIN));
         builder.put(BagParts.BUNDLE_SIDE, part.getChild("left_leg").getChild(BUNDLE_SIDE));
         builder.put(BagParts.BUNDLE_SIDE_STRAP, part.getChild("body").getChild(BUNDLE_SIDE_STRAP));
@@ -132,9 +132,9 @@ public class WearableStorageModel<EntityT extends LivingEntity> extends Humanoid
 
         leftLeg.addOrReplaceChild(BUNDLE_SIDE, CubeListBuilder.create()
                         .texOffs(0, 0)
-                        .addBox(3F, 9F, -4F, 4F, 4F, 4F, CubeDeformation.NONE)
+                        .addBox(4F, 11F, -1F, 4F, 4F, 4F, CubeDeformation.NONE)
                         .texOffs(16, 4)
-                        .addBox(3F, 7F, -3.5F, 2F, 2F, 3F, CubeDeformation.NONE),
+                        .addBox(4F, 9F, 0F, 2F, 2F, 3F, CubeDeformation.NONE),
                 PartPose.offset(1.9F, 0.0F, 0.0F));
 
 
@@ -142,8 +142,8 @@ public class WearableStorageModel<EntityT extends LivingEntity> extends Humanoid
 
         body.addOrReplaceChild(BUNDLE_SIDE_STRAP, CubeListBuilder.create()
                         .texOffs(0, 8)
-                        .addBox(-4.5F, 6.5F, -5.8F, 9F, 1F, 5F, CubeDeformation.NONE),
-                PartPose.offset(0.0F, 0.0F, 0.0F));
+                        .addBox(-4.5F, 8.5F, -2.5F, 9F, 1F, 5F, CubeDeformation.NONE),
+                PartPose.offset(-1.0F, 0.0F, 0.0F));
 
     }
 
@@ -151,12 +151,23 @@ public class WearableStorageModel<EntityT extends LivingEntity> extends Humanoid
 
         PartDefinition body = parentDefinition.getChild("body");
 
-        body.addOrReplaceChild(BUNDLE_BACK, CubeListBuilder.create().texOffs(0, 0).addBox(-2.5F, -0.75F, -1.5F, 5.0F, 5.0F, 4.0F, CubeDeformation.NONE)
-                .texOffs(0, 0).addBox(-1.5F, -2.75F, -0.5F, 3.0F, 2.0F, 2.0F, CubeDeformation.NONE), PartPose.offset(0.0F, 64.0F, 0.0F));
+        body.addOrReplaceChild(BUNDLE_BACK, CubeListBuilder.create()
+                .texOffs(0, 0)
+                .addBox(-5F, 2F, 1.75F, 5.0F, 5.0F, 4.0F, CubeDeformation.NONE)
+                .texOffs(0, 0)
+                .addBox(-4F, 0F, 2.75F, 3.0F, 2.0F, 2.0F, CubeDeformation.NONE)
+                .texOffs(0, 8)
+                .addBox(-3F, -2.5F, -2F, 1F, 12F, 5F, CubeDeformation.NONE),
+                PartPose.offset(0.0F, 64.0F, 0.0F));
 
-        body.addOrReplaceChild(BUNDLE_BACK_STRAP, CubeListBuilder.create().texOffs(0, 0).addBox(-0.5F, -5.0F, -1.5F, 1.0F, 12.0F, 0.0F, CubeDeformation.NONE)
-                .texOffs(0, 0).addBox(-0.5F, -5.0F, -5.6F, 1.0F, 12.0F, 0.0F, CubeDeformation.NONE)
-                .texOffs(0, 0).addBox(-0.5F, -5.0F, -5.5F, 1.0F, 0.0F, 4.0F, CubeDeformation.NONE), PartPose.offset(0.0F, 64.0F, 0.0F));
+//        body.addOrReplaceChild(BUNDLE_BACK_STRAP, CubeListBuilder.create()
+//                .texOffs(0, 0)
+//                .addBox(0.5F, -1.0F, 2.5F, 1.0F, 9.0F, 0.0F, CubeDeformation.NONE)
+//                .texOffs(0, 0)
+//                .addBox(0.5F, -1.0F, -1.6F, 1.0F, 12.0F, 0.0F, CubeDeformation.NONE)
+//                .texOffs(0, 0)
+//                .addBox(0.5F, -1.0F, -1.5F, 1.0F, 0.0F, 4.0F, CubeDeformation.NONE),
+//                PartPose.offset(0.0F, 64.0F, 0.0F));
 
     }
 
@@ -180,9 +191,8 @@ public class WearableStorageModel<EntityT extends LivingEntity> extends Humanoid
     public void copyPropertiesThrough(boolean crouching) {
         this.body.getChild(BACKPACK_MAIN).copyFrom(this.body);
         this.body.getChild(BUNDLE_BACK).copyFrom(this.body);
-        this.body.getChild(BUNDLE_BACK_STRAP).copyFrom(this.body);
-        this.body.getChild(BUNDLE_BACK).zRot -= 0.5F;
-        this.body.getChild(BUNDLE_BACK_STRAP).zRot -= 0.5F;
+//        this.body.getChild(BUNDLE_BACK_STRAP).copyFrom(this.body);
+        this.body.getChild(BUNDLE_BACK).zRot -= 0.7F;
 
         this.body.getChild(BUNDLE_SIDE_STRAP).copyFrom(this.body);
 
@@ -192,15 +202,15 @@ public class WearableStorageModel<EntityT extends LivingEntity> extends Humanoid
 
             this.body.getChild(BUNDLE_BACK).y -= 2F;
             this.body.getChild(BUNDLE_BACK).z += 1.2F;
-            this.body.getChild(BUNDLE_BACK_STRAP).y -= 2F;
-            this.body.getChild(BUNDLE_BACK_STRAP).z += 1.2F;
+//            this.body.getChild(BUNDLE_BACK_STRAP).y -= 2F;
+//            this.body.getChild(BUNDLE_BACK_STRAP).z += 1.2F;
 
             this.body.getChild(BUNDLE_BACK).zRot += 0.2F;
-            this.body.getChild(BUNDLE_BACK_STRAP).zRot += 0.2F;
+//            this.body.getChild(BUNDLE_BACK_STRAP).zRot += 0.2F;
             this.body.getChild(BUNDLE_BACK).xRot -= 0.5F;
-            this.body.getChild(BUNDLE_BACK_STRAP).xRot -= 0.5F;
+//            this.body.getChild(BUNDLE_BACK_STRAP).xRot -= 0.5F;
             this.body.getChild(BUNDLE_BACK).yRot -= 0.2F;
-            this.body.getChild(BUNDLE_BACK_STRAP).yRot -= 0.2F;
+//            this.body.getChild(BUNDLE_BACK_STRAP).yRot -= 0.2F;
         }
 
         this.leftLeg.getChild(BUNDLE_SIDE).copyFrom(this.body);
