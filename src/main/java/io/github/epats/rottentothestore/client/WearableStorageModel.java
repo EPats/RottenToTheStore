@@ -1,17 +1,11 @@
 package io.github.epats.rottentothestore.client;
 
 import io.github.epats.rottentothestore.client.WearableStorageLayer.BagParts;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.Map;
@@ -30,17 +24,16 @@ public class WearableStorageModel<EntityT extends LivingEntity> extends Humanoid
     private static final String BACKPACK_BUTTON_TOP = "backpack_button_top";
 
     private static final String BUNDLE_BACK = "bundle_back";
-//    private static final String BUNDLE_BACK_STRAP = "bundle_back_strap";
     private static final String BUNDLE_SIDE = "bundle_side";
     private static final String BUNDLE_SIDE_STRAP = "bundle_side_strap";
 
-    public final ModelPart head;
-    public final ModelPart hat;
-    public final ModelPart body;
-    public final ModelPart rightArm;
-    public final ModelPart leftArm;
-    public final ModelPart rightLeg;
-    public final ModelPart leftLeg;
+    private final ModelPart head;
+    private final ModelPart hat;
+    private final ModelPart body;
+    private final ModelPart rightArm;
+    private final ModelPart leftArm;
+    private final ModelPart rightLeg;
+    private final ModelPart leftLeg;
 
     public final Map<BagParts, ModelPart> MODEL_PART_MAP;
 
@@ -60,7 +53,6 @@ public class WearableStorageModel<EntityT extends LivingEntity> extends Humanoid
 
         ImmutableMap.Builder<BagParts, ModelPart> builder = ImmutableMap.builder();
         builder.put(BagParts.BUNDLE_BACK, part.getChild("body").getChild(BUNDLE_BACK));
-//        builder.put(BagParts.BUNDLE_BACK_STRAP, part.getChild("body").getChild(BUNDLE_BACK_STRAP));
         builder.put(BagParts.BACKPACK_MAIN, part.getChild("body").getChild(BACKPACK_MAIN));
         builder.put(BagParts.BUNDLE_SIDE, part.getChild("left_leg").getChild(BUNDLE_SIDE));
         builder.put(BagParts.BUNDLE_SIDE_STRAP, part.getChild("body").getChild(BUNDLE_SIDE_STRAP));
@@ -157,64 +149,28 @@ public class WearableStorageModel<EntityT extends LivingEntity> extends Humanoid
                 .texOffs(0, 0)
                 .addBox(-4F, 0F, 2.75F, 3.0F, 2.0F, 2.0F, CubeDeformation.NONE)
                 .texOffs(0, 8)
-                .addBox(-3F, -2.5F, -2F, 1F, 12F, 5F, CubeDeformation.NONE),
+                .addBox(-3F, -2.5F, -2.5F, 1F, 12F, 5F, CubeDeformation.NONE),
                 PartPose.offset(0.0F, 64.0F, 0.0F));
-
-//        body.addOrReplaceChild(BUNDLE_BACK_STRAP, CubeListBuilder.create()
-//                .texOffs(0, 0)
-//                .addBox(0.5F, -1.0F, 2.5F, 1.0F, 9.0F, 0.0F, CubeDeformation.NONE)
-//                .texOffs(0, 0)
-//                .addBox(0.5F, -1.0F, -1.6F, 1.0F, 12.0F, 0.0F, CubeDeformation.NONE)
-//                .texOffs(0, 0)
-//                .addBox(0.5F, -1.0F, -1.5F, 1.0F, 0.0F, 4.0F, CubeDeformation.NONE),
-//                PartPose.offset(0.0F, 64.0F, 0.0F));
-
-    }
-
-
-    public static void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, int color,
-                              ImmutableList<ModelPart> backpack, ImmutableList<ModelPart> buttons, BagParts parts) {
-        VertexConsumer vertexBuilder = buffer
-                .getBuffer(RenderType.entityCutoutNoCull(WearableStorageLayer.BACKPACK_TEXTURE));
-
-        float r = (float) (color >> 16 & 255) / 255.0F;
-        float g = (float) (color >> 8 & 255) / 255.0F;
-        float b = (float) (color & 255) / 255.0F;
-        backpack.forEach((part) -> {
-            part.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, r, g, b, 1.0F);
-        });
-        buttons.forEach((part) -> {
-            part.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-        });
     }
 
     public void copyPropertiesThrough(boolean crouching) {
         this.body.getChild(BACKPACK_MAIN).copyFrom(this.body);
-        this.body.getChild(BUNDLE_BACK).copyFrom(this.body);
-//        this.body.getChild(BUNDLE_BACK_STRAP).copyFrom(this.body);
-        this.body.getChild(BUNDLE_BACK).zRot -= 0.7F;
 
+        this.body.getChild(BUNDLE_BACK).copyFrom(this.body);
+        this.leftLeg.getChild(BUNDLE_SIDE).copyFrom(this.body);
         this.body.getChild(BUNDLE_SIDE_STRAP).copyFrom(this.body);
 
+        this.body.getChild(BUNDLE_BACK).zRot -= 0.7F;
+
         if(crouching) {
-            this.body.getChild(BUNDLE_SIDE_STRAP).y -= 2F;
-            this.body.getChild(BUNDLE_SIDE_STRAP).z += 1.2F;
+            this.body.getChild(BUNDLE_BACK).yRot += 0.4F;
+            this.body.getChild(BUNDLE_BACK).xRot -= 0.1F;
 
-            this.body.getChild(BUNDLE_BACK).y -= 2F;
-            this.body.getChild(BUNDLE_BACK).z += 1.2F;
-//            this.body.getChild(BUNDLE_BACK_STRAP).y -= 2F;
-//            this.body.getChild(BUNDLE_BACK_STRAP).z += 1.2F;
-
-            this.body.getChild(BUNDLE_BACK).zRot += 0.2F;
-//            this.body.getChild(BUNDLE_BACK_STRAP).zRot += 0.2F;
-            this.body.getChild(BUNDLE_BACK).xRot -= 0.5F;
-//            this.body.getChild(BUNDLE_BACK_STRAP).xRot -= 0.5F;
-            this.body.getChild(BUNDLE_BACK).yRot -= 0.2F;
-//            this.body.getChild(BUNDLE_BACK_STRAP).yRot -= 0.2F;
+            this.body.getChild(BUNDLE_SIDE_STRAP).z -= 0.4F;
+            this.leftLeg.getChild(BUNDLE_SIDE).xRot -= 0.3F;
         }
 
-        this.leftLeg.getChild(BUNDLE_SIDE).copyFrom(this.body);
-        this.leftLeg.getChild(BUNDLE_SIDE).xRot += this.leftLeg.xRot * 0.1F;
+        this.leftLeg.getChild(BUNDLE_SIDE).xRot += this.leftLeg.xRot * 0.15F;
     }
 
 }

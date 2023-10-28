@@ -14,13 +14,9 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static io.github.epats.rottentothestore.common.CreativeModeTabRegistry.addItemToTab;
 
@@ -56,7 +52,6 @@ public class ItemRegistry {
                     , slot -> {
                         if(slot == EquipmentSlot.CHEST) {
                             return new WearableStorageLayer.BagParts[]{
-//                                    WearableStorageLayer.BagParts.BUNDLE_BACK_STRAP,
                                     WearableStorageLayer.BagParts.BUNDLE_BACK};
                         } else if(slot == EquipmentSlot.LEGS) {
                             return new WearableStorageLayer.BagParts[]{
