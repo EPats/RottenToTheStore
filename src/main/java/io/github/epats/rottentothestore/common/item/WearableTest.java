@@ -1,31 +1,70 @@
 package io.github.epats.rottentothestore.common.item;
 
 import io.github.epats.rottentothestore.client.WearableStorageLayer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.DyeableLeatherItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Arrays;
 import java.util.function.Function;
 
-public class WearableTest extends Item {
+public class WearableTest extends Item implements DyeableLeatherItem {
 
     private final EquipmentSlot[] EQUIPMENT_SLOTS;
-    private final Function<EquipmentSlot, WearableStorageLayer.BagParts[]> BAG_PARTS_FN;
+    private final Function<EquipmentSlot, WearableStorageLayer.BagParts[]> DYEABLE_BAG_PARTS_FN;
+    private final Function<EquipmentSlot, WearableStorageLayer.BagParts[]> SOLID_COLOUR_BAG_PARTS_FN;
+    private final ResourceLocation dyeableColourTexture;
+    private final ResourceLocation solidColourTexture;
+    private final boolean canDye;
+    public static final WearableStorageLayer.BagParts[] EMPTY_BAG_PARTS_ARRAY = new WearableStorageLayer.BagParts[0];
+    public static final Function<EquipmentSlot, WearableStorageLayer.BagParts[]> EMPTY_BAG_ARRAY_FN = (equipmentSlot -> EMPTY_BAG_PARTS_ARRAY);
 
-    public WearableTest(Item.Properties properties, EquipmentSlot[] equipmentSlots, Function<EquipmentSlot, WearableStorageLayer.BagParts[]> bagPartsFunction) {
+    public WearableTest(Item.Properties properties, EquipmentSlot[] equipmentSlots,
+                        Function<EquipmentSlot, WearableStorageLayer.BagParts[]> solidColourBagPartsFn,
+                        ResourceLocation solidColourTexture) {
+        this(properties, equipmentSlots, EMPTY_BAG_ARRAY_FN, solidColourBagPartsFn, solidColourTexture, solidColourTexture, false);
+    }
+
+    public WearableTest(Item.Properties properties, EquipmentSlot[] equipmentSlots,
+                        Function<EquipmentSlot, WearableStorageLayer.BagParts[]> dyeableBagPartsFn,
+                        Function<EquipmentSlot, WearableStorageLayer.BagParts[]> solidColourBagPartsFn,
+                        ResourceLocation dyeableColourTexture, ResourceLocation solidColourTexture, boolean canDye) {
         super(properties);
         this.EQUIPMENT_SLOTS = equipmentSlots;
-        this.BAG_PARTS_FN = bagPartsFunction;
+        this.DYEABLE_BAG_PARTS_FN = dyeableBagPartsFn;
+        this.SOLID_COLOUR_BAG_PARTS_FN = solidColourBagPartsFn;
+        this.dyeableColourTexture = dyeableColourTexture;
+        this.solidColourTexture = solidColourTexture;
+        this.canDye = canDye;
     }
+
 
     @Override
     public boolean canEquip(ItemStack stack, EquipmentSlot armorType, Entity entity) {
         return Arrays.stream(this.EQUIPMENT_SLOTS).anyMatch(equipmentSlot -> equipmentSlot == armorType);
     }
 
-    public WearableStorageLayer.BagParts[] getBagPartsFromSlot(EquipmentSlot equipmentSlot) {
-        return this.BAG_PARTS_FN.apply(equipmentSlot);
+    public WearableStorageLayer.BagParts[] getDyeableBagPartsForRender(EquipmentSlot equipmentSlot) {
+        return this.DYEABLE_BAG_PARTS_FN.apply(equipmentSlot);
     }
+
+    public WearableStorageLayer.BagParts[] getSolidColourBagPartsForRender(EquipmentSlot equipmentSlot) {
+        return this.SOLID_COLOUR_BAG_PARTS_FN.apply(equipmentSlot);
+    }
+
+    public ResourceLocation getDyeableTexture() {
+        return this.dyeableColourTexture;
+    }
+
+    public ResourceLocation getSolidColourTexture() {
+        return this.solidColourTexture;
+    }
+
+    public boolean canDye() {
+        return this.canDye;
+    }
+
 }

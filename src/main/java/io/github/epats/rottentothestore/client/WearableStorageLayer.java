@@ -20,6 +20,8 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Arrays;
+
 public class WearableStorageLayer<EntityT extends LivingEntity, ModelT extends HumanoidModel<EntityT>>
         extends RenderLayer<EntityT, ModelT> {
 
@@ -29,8 +31,11 @@ public class WearableStorageLayer<EntityT extends LivingEntity, ModelT extends H
     public static final ModelLayerLocation WEARABLE_STORAGE_MODEL_LAYER =
             new ModelLayerLocation(WEARABLE_STORAGE_LAYER, "wearable_storage");
 
-    public static final  ResourceLocation BACKPACK_TEXTURE = new ResourceLocation(RottenToTheStore.MOD_ID,
+    public static final ResourceLocation BACKPACK_TEXTURE = new ResourceLocation(RottenToTheStore.MOD_ID,
             "textures/model/armor/backpack.png");
+
+    public static final ResourceLocation BACKPACK_TEXTURE_BUTTONS = new ResourceLocation(RottenToTheStore.MOD_ID,
+            "textures/model/armor/buttons.png");
 
     private final WearableStorageModel<EntityT> model;
 
@@ -59,38 +64,44 @@ public class WearableStorageLayer<EntityT extends LivingEntity, ModelT extends H
         if(!(itemStack.getItem() instanceof WearableTest))
             return;
 
-        boolean flag1 = itemStack.hasFoil();
+        boolean hasFoil = itemStack.hasFoil();
         WearableTest equippedBag = (WearableTest) itemStack.getItem();
-        if (equippedBag instanceof net.minecraft.world.item.DyeableLeatherItem) {
-            int i = ((net.minecraft.world.item.DyeableLeatherItem) equippedBag).getColor(itemStack);
-            float f = (float) (i >> 16 & 255) / 255.0F;
-            float f1 = (float) (i >> 8 & 255) / 255.0F;
-            float f2 = (float) (i & 255) / 255.0F;
-            this.renderModel(poseStack, bufferSource, packedLight, flag1, f, f1, f2, livingEntity, true, equippedBag, slot);
-            this.renderModel(poseStack, bufferSource, packedLight, flag1, 1.0F, 1.0F, 1.0F, livingEntity, false, equippedBag, slot);
-        } else {
-            this.renderModel(poseStack, bufferSource, packedLight, flag1, 1.0F, 1.0F, 1.0F, livingEntity, false, equippedBag, slot);
+        if(equippedBag.canDye()) {
+            this.renderDyeableModelParts(poseStack, bufferSource, packedLight, itemStack, equippedBag, slot, hasFoil);
         }
+        this.renderSolidColourModelParts(poseStack, bufferSource, packedLight, equippedBag, slot, hasFoil);
     }
 
-    private void renderModel(PoseStack pPoseStack, MultiBufferSource pBuffer, int packedLight, boolean foil, float r,
-                             float g, float b, LivingEntity livingEntity, Boolean customColour, WearableTest equippedBag, EquipmentSlot equipmentSlot) {
-        VertexConsumer vertexConsumer = ItemRenderer.getArmorFoilBuffer(pBuffer,
-                RenderType.armorCutoutNoCull(BACKPACK_TEXTURE), false, foil);
-        BagParts[] parts = equippedBag.getBagPartsFromSlot(equipmentSlot);
-
-        this.renderModel(pPoseStack, vertexConsumer, pBuffer, packedLight, r, g, b, customColour, parts);
+    private void renderSolidColourModelParts(PoseStack pPoseStack, MultiBufferSource pBuffer, int packedLight,
+                                             WearableTest equippedBag, EquipmentSlot equipmentSlot, boolean foil) {
+        ResourceLocation backpackTexture = equippedBag.getSolidColourTexture();
+        BagParts[] parts = equippedBag.getSolidColourBagPartsForRender(equipmentSlot);
+        this.renderModel(pPoseStack, pBuffer, packedLight, 1.0F, 1.0F, 1.0F, parts, foil, backpackTexture);
     }
 
-    private void renderModel(PoseStack pPoseStack, VertexConsumer vertexBuilder, MultiBufferSource pBuffer,
-                       int packedLight, float r, float g, float b, Boolean customColour, BagParts[] parts) {
-        ImmutableList.Builder<ModelPart> modelPartsBuilder = ImmutableList.builder();
-        for(BagParts part : parts) {
-            modelPartsBuilder.add(this.model.MODEL_PART_MAP.get(part));
-        }
-        ImmutableList<ModelPart> modelParts = modelPartsBuilder.build();
+    private void renderDyeableModelParts(PoseStack pPoseStack, MultiBufferSource pBuffer, int packedLight, ItemStack itemStack,
+                                         WearableTest equippedBag, EquipmentSlot equipmentSlot, boolean foil) {
+        ResourceLocation backpackTexture = equippedBag.getDyeableTexture();
+        BagParts[] parts = equippedBag.getDyeableBagPartsForRender(equipmentSlot);
+        this.renderModel(pPoseStack, pBuffer, packedLight, 1.0F, 1.0F, 1.0F, parts, foil, backpackTexture);
+        int color = equippedBag.getColor(itemStack);
+        float r = (float) (color >> 16 & 255) / 255.0F;
+        float g = (float) (color >> 8 & 255) / 255.0F;
+        float b = (float) (color & 255) / 255.0F;
+        this.renderModel(pPoseStack, pBuffer, packedLight, r, g, b, parts, foil, backpackTexture);
+    }
+
+    private void renderModel(PoseStack pPoseStack, MultiBufferSource pBuffer, int packedLight,
+                             float r, float g, float b, BagParts[] parts, boolean foil, ResourceLocation texture) {
+
+        VertexConsumer vertexConsumer = ItemRenderer.getArmorFoilBuffer(pBuffer, RenderType.armorCutoutNoCull(texture), false, foil);
+
+        ImmutableList<ModelPart> modelParts = Arrays.stream(parts)
+                .map(part -> this.model.MODEL_PART_MAP.get(part))
+                .collect(ImmutableList.toImmutableList());
+
         modelParts.forEach((part) -> {
-            part.render(pPoseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, r, g, b, 1.0F);
+            part.render(pPoseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, r, g, b, 1.0F);
         });
     }
 
@@ -100,12 +111,13 @@ public class WearableStorageLayer<EntityT extends LivingEntity, ModelT extends H
 
     public enum BagParts {
         BUNDLE_BACK,
-//        BUNDLE_BACK_STRAP,
         BUNDLE_SIDE,
         BUNDLE_SIDE_STRAP,
         BACKPACK_MAIN,
+        BACKPACK_MAIN_BUTTONS,
         BACKPACK_TOP,
+        BACKPACK_TOP_BUTTONS,
         BACKPACK_FRONT,
-        BACKPACK_STRAPS
+        BACKPACK_FRONT_BUTTONS
     }
 }

@@ -11,21 +11,16 @@ import net.minecraft.world.entity.LivingEntity;
 import java.util.Map;
 
 public class WearableStorageModel<EntityT extends LivingEntity> extends HumanoidModel<EntityT> {
-    private static final String BACKPACK_MAIN = "backpack_main";
-    private static final String BACKPACK_FRONT = "backpack_front";
-    private static final String BACKPACK_TOP = "backpack_top";
-    private static final String BACKPACK_STRAP_1 = "backpack_strap_1";
-    private static final String BACKPACK_STRAP_2 = "backpack_strap_2";
-    private static final String BACKPACK_STRAP_1_TOP = "backpack_strap_1_top";
-    private static final String BACKPACK_STRAP_2_TOP = "backpack_strap_2_top";
-    private static final String BACKPACK_BUTTON_MAIN_1 = "backpack_button_main_1";
-    private static final String BACKPACK_BUTTON_MAIN_2 = "backpack_button_main_2";
-    private static final String BACKPACK_BUTTON_FRONT = "backpack_button_front";
-    private static final String BACKPACK_BUTTON_TOP = "backpack_button_top";
-
     private static final String BUNDLE_BACK = "bundle_back";
     private static final String BUNDLE_SIDE = "bundle_side";
     private static final String BUNDLE_SIDE_STRAP = "bundle_side_strap";
+    private static final String BACKPACK_MAIN = "backpack_main";
+    private static final String BACKPACK_FRONT = "backpack_front";
+    private static final String BACKPACK_TOP = "backpack_top";
+    private static final String BACKPACK_MAIN_BUTTONS = "backpack_main_buttons";
+    private static final String BACKPACK_FRONT_BUTTONS = "backpack_front_button";
+    private static final String BACKPACK_TOP_BUTTONS = "backpack_top_button";
+
 
     private final ModelPart head;
     private final ModelPart hat;
@@ -53,9 +48,14 @@ public class WearableStorageModel<EntityT extends LivingEntity> extends Humanoid
 
         ImmutableMap.Builder<BagParts, ModelPart> builder = ImmutableMap.builder();
         builder.put(BagParts.BUNDLE_BACK, part.getChild("body").getChild(BUNDLE_BACK));
-        builder.put(BagParts.BACKPACK_MAIN, part.getChild("body").getChild(BACKPACK_MAIN));
         builder.put(BagParts.BUNDLE_SIDE, part.getChild("left_leg").getChild(BUNDLE_SIDE));
         builder.put(BagParts.BUNDLE_SIDE_STRAP, part.getChild("body").getChild(BUNDLE_SIDE_STRAP));
+        builder.put(BagParts.BACKPACK_MAIN, part.getChild("body").getChild(BACKPACK_MAIN));
+        builder.put(BagParts.BACKPACK_MAIN_BUTTONS, part.getChild("body").getChild(BACKPACK_MAIN_BUTTONS));
+        builder.put(BagParts.BACKPACK_TOP, part.getChild("body").getChild(BACKPACK_TOP));
+        builder.put(BagParts.BACKPACK_TOP_BUTTONS, part.getChild("body").getChild(BACKPACK_TOP_BUTTONS));
+        builder.put(BagParts.BACKPACK_FRONT, part.getChild("body").getChild(BACKPACK_FRONT));
+        builder.put(BagParts.BACKPACK_FRONT_BUTTONS, part.getChild("body").getChild(BACKPACK_FRONT_BUTTONS));
         return builder.build();
     }
 
@@ -73,47 +73,7 @@ public class WearableStorageModel<EntityT extends LivingEntity> extends Humanoid
 
         renderSideBundle(parentDefinition);
         renderBackBundle(parentDefinition);
-
-        PartDefinition body = parentDefinition.getChild("body");
-
-        body.addOrReplaceChild(BACKPACK_MAIN,
-                CubeListBuilder.create().texOffs(0, 0).addBox(-6.0F, 13.0F, 2.0F, 12.0F, 11.0F, 6.0F, true),
-                PartPose.offset(0.0F, 0.0F, 0.0F));
-        body.addOrReplaceChild(BACKPACK_FRONT,
-                CubeListBuilder.create().texOffs(0, 17).addBox(-5.0F, 13.0F, 8.0F, 10.0F, 7.0F, 3.0F, true),
-                PartPose.offset(0.0F, 0.0F, 0.0F));
-        body.addOrReplaceChild(BACKPACK_TOP,
-                CubeListBuilder.create().texOffs(26, 17).addBox(-5.0F, 24.0F, 2.0F, 10.0F, 3.0F, 5.0F, true),
-                PartPose.offset(0.0F, 0.0F, 0.0F));
-
-        float strapOffset = isWorn ? -3.0F : 1.0F;
-        body.addOrReplaceChild(BACKPACK_STRAP_1,
-                CubeListBuilder.create().texOffs(36, 0).addBox(3.0F, 15.0F, strapOffset, 2.0F, 9.0F, 1.0F, true),
-                PartPose.offset(0.0F, 0.0F, 0.0F));
-        body.addOrReplaceChild(BACKPACK_STRAP_2,
-                CubeListBuilder.create().texOffs(42, 0).addBox(-5.0F, 15.0F, strapOffset, 2.0F, 9.0F, 1.0F, true),
-                PartPose.offset(0.0F, 0.0F, 0.0F));
-
-        float strapTopX = isWorn ? 2.0F : 0.0F;
-        float strapTopY = isWorn ? 1.0F : 0.0F;
-        float strapTopZ = isWorn ? 5.0F : 0.0F;
-        body.addOrReplaceChild(BACKPACK_STRAP_1_TOP, CubeListBuilder.create().texOffs(48, 0).addBox(3.0F, 24.0F, -3.0F,
-                strapTopX, strapTopY, strapTopZ, true), PartPose.offset(0.0F, 0.0F, 0.0F));
-        body.addOrReplaceChild(BACKPACK_STRAP_2_TOP, CubeListBuilder.create().texOffs(48, 6).addBox(-5.0F, 24.0F, -3.0F,
-                strapTopX, strapTopY, strapTopZ, true), PartPose.offset(0.0F, 0.0F, 0.0F));
-
-        body.addOrReplaceChild(BACKPACK_BUTTON_MAIN_1,
-                CubeListBuilder.create().texOffs(30, 0).addBox(-4.0F, 20.5F, 7.5F, 1.0F, 2.0F, 1.0F, true),
-                PartPose.offset(0.0F, 0.0F, 0.0F));
-        body.addOrReplaceChild(BACKPACK_BUTTON_MAIN_2,
-                CubeListBuilder.create().texOffs(30, 3).addBox(3.0F, 20.5F, 7.5F, 1.0F, 2.0F, 1.0F, true),
-                PartPose.offset(0.0F, 0.0F, 0.0F));
-        body.addOrReplaceChild(BACKPACK_BUTTON_FRONT,
-                CubeListBuilder.create().texOffs(0, 0).addBox(-1.0F, 16.0F, 10.5F, 2.0F, 2.0F, 1.0F, true),
-                PartPose.offset(0.0F, 0.0F, 0.0F));
-        body.addOrReplaceChild(BACKPACK_BUTTON_TOP,
-                CubeListBuilder.create().texOffs(0, 3).addBox(-1.0F, 25.5F, 6.5F, 2.0F, 1.0F, 1.0F, true),
-                PartPose.offset(0.0F, 0.0F, 0.0F));
+        renderBackpack(parentDefinition.getChild("body"));
 
         return LayerDefinition.create(meshdefinition, 64, 32);
     }
@@ -153,10 +113,72 @@ public class WearableStorageModel<EntityT extends LivingEntity> extends Humanoid
                 PartPose.offset(0.0F, 64.0F, 0.0F));
     }
 
+    private static void renderBackpack(PartDefinition body) {
+
+        body.addOrReplaceChild(BACKPACK_MAIN,
+                CubeListBuilder.create()
+                        .texOffs(0, 0)
+                        .addBox(-5.0F, 2.0F, 2.0F, 10.0F, 10.0F, 4.0F, true)
+                        .texOffs(36, 0)
+                        .addBox(3.0F, 0.0F, -3F, 2.0F, 9.0F, 1.0F, true)
+                        .texOffs(42, 0)
+                        .addBox(-5.0F, 0.0F, -3F, 2.0F, 9.0F, 1.0F, true)
+                        .texOffs(48, 0)
+                        .addBox(3.0F, -1.0F, -3.0F, 2F, 1F, 5F, true)
+                        .texOffs(48, 6)
+                        .addBox(-5.0F, -1.0F, -3.0F, 2F, 1F, 5F, true)
+                        .texOffs(36, 0)
+                        .addBox(3.0F, -1.0F, 2F, 2.0F, 5.0F, 1.0F, true)
+                        .texOffs(42, 0)
+                        .addBox(-5.0F, -1.0F, 2F, 2.0F, 5.0F, 1.0F, true),
+                PartPose.offset(0.0F, 64.0F, 0.0F));
+
+        body.addOrReplaceChild(BACKPACK_MAIN_BUTTONS,
+                CubeListBuilder.create()
+                        .texOffs(30, 0)
+                        .addBox(-3.5F, 3.5F, 5.5F, 1.0F, 2.0F, 1.0F, true)
+                        .texOffs(30, 3)
+                        .addBox(2.5F, 3.5F, 5.5F, 1.0F, 2.0F, 1.0F, true),
+                PartPose.offset(0.0F, 64.0F, 0.0F));
+
+
+        body.addOrReplaceChild(BACKPACK_FRONT,
+                CubeListBuilder.create()
+                        .texOffs(0, 17)
+                        .addBox(-4F, 6.5F, 6.0F, 8.0F, 5.0F, 2.0F, true),
+                PartPose.offset(0.0F, 64.0F, 0.0F));
+
+        body.addOrReplaceChild(BACKPACK_FRONT_BUTTONS,
+                CubeListBuilder.create()
+                        .texOffs(0, 0)
+                        .addBox(-1.0F, 7.5F, 7.5F, 2.0F, 2.0F, 1.0F, true),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+
+        body.addOrReplaceChild(BACKPACK_TOP,
+                CubeListBuilder.create()
+                        .texOffs(26, 17)
+                        .addBox(-3.5F, -1.0F, 2.0F, 7.0F, 3.0F, 3.0F, true),
+                PartPose.offset(0.0F, 64.0F, 0.0F));
+
+        body.addOrReplaceChild(BACKPACK_TOP_BUTTONS,
+                CubeListBuilder.create()
+                        .texOffs(0, 3)
+                        .addBox(-1.0F, 0.5F, 4.5F, 2.0F, 1.0F, 1.0F, true),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+    }
+
     public void copyPropertiesThrough(boolean crouching) {
         this.body.getChild(BACKPACK_MAIN).copyFrom(this.body);
+        this.body.getChild(BACKPACK_MAIN_BUTTONS).copyFrom(this.body);
+        this.body.getChild(BACKPACK_TOP).copyFrom(this.body);
+        this.body.getChild(BACKPACK_TOP_BUTTONS).copyFrom(this.body);
+        this.body.getChild(BACKPACK_FRONT).copyFrom(this.body);
+        this.body.getChild(BACKPACK_FRONT_BUTTONS).copyFrom(this.body);
 
         this.body.getChild(BUNDLE_BACK).copyFrom(this.body);
+
         this.leftLeg.getChild(BUNDLE_SIDE).copyFrom(this.body);
         this.body.getChild(BUNDLE_SIDE_STRAP).copyFrom(this.body);
 

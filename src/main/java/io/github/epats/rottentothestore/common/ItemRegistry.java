@@ -5,6 +5,7 @@ import io.github.epats.rottentothestore.client.WearableStorageLayer;
 import io.github.epats.rottentothestore.common.item.ItemBlankSlot;
 import io.github.epats.rottentothestore.common.item.ItemBundle;
 import io.github.epats.rottentothestore.common.item.WearableTest;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -48,8 +49,8 @@ public class ItemRegistry {
 
     public static final RegistryObject<WearableTest> TEST = addItemToTab(ITEMS.register("test",
             () -> new WearableTest(new Item.Properties()
-                    , new EquipmentSlot[]{EquipmentSlot.CHEST, EquipmentSlot.LEGS}
-                    , slot -> {
+                    , new EquipmentSlot[]{EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.HEAD}
+                    , (slot -> {
                         if(slot == EquipmentSlot.CHEST) {
                             return new WearableStorageLayer.BagParts[]{
                                     WearableStorageLayer.BagParts.BUNDLE_BACK};
@@ -57,10 +58,28 @@ public class ItemRegistry {
                             return new WearableStorageLayer.BagParts[]{
                                     WearableStorageLayer.BagParts.BUNDLE_SIDE_STRAP,
                                     WearableStorageLayer.BagParts.BUNDLE_SIDE};
+                        } else if(slot == EquipmentSlot.HEAD) {
+                            return new WearableStorageLayer.BagParts[]{
+                                    WearableStorageLayer.BagParts.BACKPACK_MAIN,
+                                    WearableStorageLayer.BagParts.BACKPACK_TOP,
+                                    WearableStorageLayer.BagParts.BACKPACK_FRONT
+                            };
                         } else {
-                            return new WearableStorageLayer.BagParts[0];
+                            return WearableTest.EMPTY_BAG_PARTS_ARRAY;
                         }
-                     }))
+                     })
+                    , (slot -> {
+                        if(slot == EquipmentSlot.HEAD) {
+                            return new WearableStorageLayer.BagParts[]{
+                                    WearableStorageLayer.BagParts.BACKPACK_MAIN_BUTTONS,
+                                    WearableStorageLayer.BagParts.BACKPACK_TOP_BUTTONS,
+                                    WearableStorageLayer.BagParts.BACKPACK_FRONT_BUTTONS
+                            };
+                        } else {
+                            return WearableTest.EMPTY_BAG_PARTS_ARRAY;
+                        }
+                    })
+                    , WearableStorageLayer.BACKPACK_TEXTURE, WearableStorageLayer.BACKPACK_TEXTURE_BUTTONS, true))
                     , CreativeModeTabRegistry.BAG_TAB_ITEMS);
 
     public static void register(IEventBus modBus) {
