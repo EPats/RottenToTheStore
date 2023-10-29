@@ -2,7 +2,7 @@ package io.github.epats.rottentothestore.common;
 
 
 import io.github.epats.rottentothestore.common.inventory.tooltip.CustomBundleTooltip;
-import io.github.epats.rottentothestore.common.item.ItemBundle;
+import io.github.epats.rottentothestore.common.item.ItemBag;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -280,7 +280,7 @@ public class InventoryHelper {
     }
 
     private static boolean hasSpaceInBag(ItemStack bagItemStack, ItemStack itemStackedOn, int maxWeight, int numberOfSlots) {
-        if(!(bagItemStack.getItem() instanceof ItemBundle) || maxWeight <= getWeightOfBagContents(bagItemStack))
+        if(!(bagItemStack.getItem() instanceof ItemBag) || maxWeight <= getWeightOfBagContents(bagItemStack))
             return false;
 
         return getContentsFromBag(bagItemStack).anyMatch(itemStack ->

@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.epats.rottentothestore.RottenToTheStore;
-import io.github.epats.rottentothestore.common.item.WearableTest;
+import io.github.epats.rottentothestore.common.item.ItemBagWearable;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -61,11 +61,11 @@ public class WearableStorageLayer<EntityT extends LivingEntity, ModelT extends H
     private void renderStoragePiece(PoseStack poseStack, MultiBufferSource bufferSource, LivingEntity livingEntity,
                                     int packedLight, EquipmentSlot slot) {
         ItemStack itemStack = livingEntity.getItemBySlot(slot);
-        if(!(itemStack.getItem() instanceof WearableTest))
+        if(!(itemStack.getItem() instanceof ItemBagWearable))
             return;
 
         boolean hasFoil = itemStack.hasFoil();
-        WearableTest equippedBag = (WearableTest) itemStack.getItem();
+        ItemBagWearable equippedBag = (ItemBagWearable) itemStack.getItem();
         if(equippedBag.canDye()) {
             this.renderDyeableModelParts(poseStack, bufferSource, packedLight, itemStack, equippedBag, slot, hasFoil);
         }
@@ -73,14 +73,14 @@ public class WearableStorageLayer<EntityT extends LivingEntity, ModelT extends H
     }
 
     private void renderSolidColourModelParts(PoseStack pPoseStack, MultiBufferSource pBuffer, int packedLight,
-                                             WearableTest equippedBag, EquipmentSlot equipmentSlot, boolean foil) {
+                                             ItemBagWearable equippedBag, EquipmentSlot equipmentSlot, boolean foil) {
         ResourceLocation backpackTexture = equippedBag.getSolidColourTexture();
         BagParts[] parts = equippedBag.getSolidColourBagPartsForRender(equipmentSlot);
         this.renderModel(pPoseStack, pBuffer, packedLight, 1.0F, 1.0F, 1.0F, parts, foil, backpackTexture);
     }
 
     private void renderDyeableModelParts(PoseStack pPoseStack, MultiBufferSource pBuffer, int packedLight, ItemStack itemStack,
-                                         WearableTest equippedBag, EquipmentSlot equipmentSlot, boolean foil) {
+                                         ItemBagWearable equippedBag, EquipmentSlot equipmentSlot, boolean foil) {
         ResourceLocation backpackTexture = equippedBag.getDyeableTexture();
         BagParts[] parts = equippedBag.getDyeableBagPartsForRender(equipmentSlot);
         this.renderModel(pPoseStack, pBuffer, packedLight, 1.0F, 1.0F, 1.0F, parts, foil, backpackTexture);

@@ -17,16 +17,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public class ItemBundle extends Item implements StorageItem {
+public class ItemBag extends Item implements StorageItem {
     private int numberOfSlots;
     private int maxWeight;
-    private Predicate<ItemStack> canAcceptItem;
+    protected final Predicate<ItemStack> CAN_ACCEPT_ITEM_FN;
 
-    public ItemBundle(Properties prop, int numberOfSlots, int maxWeight, Predicate<ItemStack> itemRestrictions) {
+    public ItemBag(Properties prop, int numberOfSlots, int maxWeight, Predicate<ItemStack> itemRestrictions) {
         super(prop);
         this.numberOfSlots = numberOfSlots;
         this.maxWeight = maxWeight;
-        this.canAcceptItem = itemRestrictions;
+        this.CAN_ACCEPT_ITEM_FN = itemRestrictions;
     }
 
     @Override
@@ -46,7 +46,7 @@ public class ItemBundle extends Item implements StorageItem {
 
     @Override
     public boolean canBagTakeItem(ItemStack stackToInsert) {
-        return this.canAcceptItem.test(stackToInsert);
+        return this.CAN_ACCEPT_ITEM_FN.test(stackToInsert);
     }
 
     @Override
@@ -112,16 +112,4 @@ public class ItemBundle extends Item implements StorageItem {
     public boolean canFitInsideContainerItems() {
         return false;
     }
-
-//    /**
-//     * Returns true if the item can be used on the given entity, e.g. shears on sheep.
-//     */
-//    public InteractionResult interactLivingEntity(ItemStack pStack, Player pPlayer, LivingEntity pInteractionTarget, InteractionHand pUsedHand) {
-//        if(!pPlayer.getLevel().isClientSide) {
-//            pPlayer.getLevel().getCapability(LevelChestProvider.levelChestCap).ifPresent(levelChest -> {
-//                levelChest.addEntity(pStack, pPlayer, pInteractionTarget);
-//            });
-//        }
-//        return InteractionResult.SUCCESS;
-//    }
 }

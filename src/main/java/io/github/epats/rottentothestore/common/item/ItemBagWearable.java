@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.Arrays;
 import java.util.function.Function;
 
-public class WearableTest extends Item implements DyeableLeatherItem {
+public class ItemBagWearable extends ItemBag implements DyeableLeatherItem {
 
     private final EquipmentSlot[] EQUIPMENT_SLOTS;
     private final Function<EquipmentSlot, WearableStorageLayer.BagParts[]> DYEABLE_BAG_PARTS_FN;
@@ -22,17 +22,19 @@ public class WearableTest extends Item implements DyeableLeatherItem {
     public static final WearableStorageLayer.BagParts[] EMPTY_BAG_PARTS_ARRAY = new WearableStorageLayer.BagParts[0];
     public static final Function<EquipmentSlot, WearableStorageLayer.BagParts[]> EMPTY_BAG_ARRAY_FN = (equipmentSlot -> EMPTY_BAG_PARTS_ARRAY);
 
-    public WearableTest(Item.Properties properties, EquipmentSlot[] equipmentSlots,
-                        Function<EquipmentSlot, WearableStorageLayer.BagParts[]> solidColourBagPartsFn,
-                        ResourceLocation solidColourTexture) {
-        this(properties, equipmentSlots, EMPTY_BAG_ARRAY_FN, solidColourBagPartsFn, solidColourTexture, solidColourTexture, false);
+    public ItemBagWearable(Item.Properties properties, EquipmentSlot[] equipmentSlots,
+                           Function<EquipmentSlot, WearableStorageLayer.BagParts[]> solidColourBagPartsFn,
+                           ResourceLocation solidColourTexture, ItemBag bagBase) {
+        this(properties, equipmentSlots, EMPTY_BAG_ARRAY_FN, solidColourBagPartsFn, solidColourTexture,
+                solidColourTexture, false, bagBase);
     }
 
-    public WearableTest(Item.Properties properties, EquipmentSlot[] equipmentSlots,
-                        Function<EquipmentSlot, WearableStorageLayer.BagParts[]> dyeableBagPartsFn,
-                        Function<EquipmentSlot, WearableStorageLayer.BagParts[]> solidColourBagPartsFn,
-                        ResourceLocation dyeableColourTexture, ResourceLocation solidColourTexture, boolean canDye) {
-        super(properties);
+    public ItemBagWearable(Item.Properties properties, EquipmentSlot[] equipmentSlots,
+                           Function<EquipmentSlot, WearableStorageLayer.BagParts[]> dyeableBagPartsFn,
+                           Function<EquipmentSlot, WearableStorageLayer.BagParts[]> solidColourBagPartsFn,
+                           ResourceLocation dyeableColourTexture, ResourceLocation solidColourTexture, boolean canDye,
+                           ItemBag bagBase) {
+        super(properties, bagBase.getNumberOfSlots(), bagBase.getMaxWeight(), bagBase.CAN_ACCEPT_ITEM_FN);
         this.EQUIPMENT_SLOTS = equipmentSlots;
         this.DYEABLE_BAG_PARTS_FN = dyeableBagPartsFn;
         this.SOLID_COLOUR_BAG_PARTS_FN = solidColourBagPartsFn;
