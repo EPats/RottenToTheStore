@@ -19,6 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 
@@ -37,15 +38,14 @@ public class WearableStorageLayer<EntityT extends LivingEntity, ModelT extends H
     public static final ResourceLocation BACKPACK_TEXTURE_BUTTONS = new ResourceLocation(RottenToTheStore.MOD_ID,
             "textures/model/armor/buttons.png");
 
-    private final WearableStorageModel<EntityT> model;
+    private final WearableStorageModel<EntityT> model = new WearableStorageModel<>(WearableStorageModel.createBodyLayer(true).bakeRoot());
 
     public WearableStorageLayer(RenderLayerParent<EntityT, ModelT> pRenderer) {
         super(pRenderer);
-        this.model = new WearableStorageModel<EntityT>(WearableStorageModel.createBodyLayer(true).bakeRoot());
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, EntityT livingEntity,
+    public void render(@NotNull PoseStack poseStack, @NotNull MultiBufferSource bufferSource, int packedLight, @NotNull EntityT livingEntity,
                        float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks,
                        float netHeadYaw, float headPitch) {
         this.getParentModel().copyPropertiesTo(model);
@@ -61,11 +61,10 @@ public class WearableStorageLayer<EntityT extends LivingEntity, ModelT extends H
     private void renderStoragePiece(PoseStack poseStack, MultiBufferSource bufferSource, LivingEntity livingEntity,
                                     int packedLight, EquipmentSlot slot) {
         ItemStack itemStack = livingEntity.getItemBySlot(slot);
-        if(!(itemStack.getItem() instanceof ItemBagWearable))
+        if(!(itemStack.getItem() instanceof ItemBagWearable equippedBag))
             return;
 
         boolean hasFoil = itemStack.hasFoil();
-        ItemBagWearable equippedBag = (ItemBagWearable) itemStack.getItem();
         if(equippedBag.canDye()) {
             this.renderDyeableModelParts(poseStack, bufferSource, packedLight, itemStack, equippedBag, slot, hasFoil);
         }
@@ -97,12 +96,10 @@ public class WearableStorageLayer<EntityT extends LivingEntity, ModelT extends H
         VertexConsumer vertexConsumer = ItemRenderer.getArmorFoilBuffer(pBuffer, RenderType.armorCutoutNoCull(texture), false, foil);
 
         ImmutableList<ModelPart> modelParts = Arrays.stream(parts)
-                .map(part -> this.model.MODEL_PART_MAP.get(part))
+                .map(this.model.MODEL_PART_MAP::get)
                 .collect(ImmutableList.toImmutableList());
 
-        modelParts.forEach((part) -> {
-            part.render(pPoseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, r, g, b, 1.0F);
-        });
+        modelParts.forEach((part) -> part.render(pPoseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, r, g, b, 1.0F));
     }
 
     public static LayerDefinition createBodyLayer() {

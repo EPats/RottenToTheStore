@@ -34,7 +34,7 @@ public class ItemBagWearable extends ItemBag implements DyeableLeatherItem {
                            Function<EquipmentSlot, WearableStorageLayer.BagParts[]> solidColourBagPartsFn,
                            ResourceLocation dyeableColourTexture, ResourceLocation solidColourTexture, boolean canDye,
                            ItemBag bagBase) {
-        super(properties, bagBase.getNumberOfSlots(), bagBase.getMaxWeight(), bagBase.CAN_ACCEPT_ITEM_FN);
+        super(properties, bagBase.getNUMBER_OF_SLOTS(), bagBase.getMAX_WEIGHT(), bagBase.CAN_ACCEPT_ITEM_FN);
         this.EQUIPMENT_SLOTS = equipmentSlots;
         this.DYEABLE_BAG_PARTS_FN = dyeableBagPartsFn;
         this.SOLID_COLOUR_BAG_PARTS_FN = solidColourBagPartsFn;

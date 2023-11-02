@@ -352,37 +352,5 @@ public class InventoryHelper {
         return BAR_COLOR;
     }
 
-    // From old code?
-//    public static Optional<ItemStack> getCarriedBagFromCompoundWearable(ItemStack wearableBagItemStack) {
-//        CompoundTag bagTag = wearableBagItemStack.getTag();
-//        if (bagTag == null)
-//            return Optional.empty();
-//
-//        ListTag listtag = bagTag.getList(TAG_WEARABLE, 10);
-//        return listtag.stream().findFirst().map(CompoundTag.class::cast).map(ItemStack::of);
-//    }
-//
-//    public static ItemStack getCarriedBagFromCompoundWearableSafe(ItemStack wearableBagItemStack) {
-//        Optional<ItemStack> optional = getCarriedBagFromCompoundWearable(wearableBagItemStack);
-//        if (optional.isPresent()) {
-//            return optional.get();
-//        } else {
-//            ItemStack newBundle = new ItemStack(Items.ACACIA_BOAT);//ItemRegistry.GRASS_BUNDLE.get());
-//            setCarriedBundle(wearableBagItemStack, newBundle);
-//            return newBundle;
-//        }
-//    }
-//
-//    public static void setCarriedBundle(ItemStack wearableBundle, ItemStack carriedBundle) {
-//        CompoundTag compoundtag = wearableBundle.getOrCreateTag();
-//        if (!compoundtag.contains(TAG_WEARABLE)) {
-//            compoundtag.put(TAG_WEARABLE, new ListTag());
-//        }
-//        ListTag listtag = compoundtag.getList(TAG_WEARABLE, 10);
-//        ItemStack itemstack1 = carriedBundle.copy();
-//        CompoundTag compoundtag2 = new CompoundTag();
-//        itemstack1.save(compoundtag2);
-//        listtag.add(0, (Tag) compoundtag2);
-//    }
 
 }

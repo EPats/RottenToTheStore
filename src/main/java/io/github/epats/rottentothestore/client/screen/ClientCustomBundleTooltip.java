@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 public class ClientCustomBundleTooltip implements ClientTooltipComponent {
     public static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/gui/container/bundle.png");
@@ -21,21 +22,21 @@ public class ClientCustomBundleTooltip implements ClientTooltipComponent {
     private final int size;
 
     public ClientCustomBundleTooltip(CustomBundleTooltip tooltip) {
-        this.items = tooltip.getItems();
-        this.weight = tooltip.getWeight();
-        this.maxWeight = tooltip.getMaxWeight();
-        this.size = tooltip.getSize();
+        this.items = tooltip.items();
+        this.weight = tooltip.weight();
+        this.maxWeight = tooltip.maxWeight();
+        this.size = tooltip.size();
     }
 
     public int getHeight() {
         return gridRows() * SLOT_HEIGHT + 2 + 4;
     }
 
-    public int getWidth(Font font) {
+    public int getWidth(@NotNull Font font) {
         return gridColumns() * SLOT_WIDTH + 2;
     }
 
-    public void renderImage(Font font, int x, int y, GuiGraphics guiGraphics) {
+    public void renderImage(@NotNull Font font, int x, int y, @NotNull GuiGraphics guiGraphics) {
         int columns = gridColumns();
         int rows = gridRows();
         boolean isBlocked = weight >= maxWeight;

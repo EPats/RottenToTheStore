@@ -12,36 +12,38 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
 public class ItemBag extends Item implements StorageItem {
-    private int numberOfSlots;
-    private int maxWeight;
+    private final int NUMBER_OF_SLOTS;
+    private final int MAX_WEIGHT;
     protected final Predicate<ItemStack> CAN_ACCEPT_ITEM_FN;
 
     public ItemBag(Properties prop, int numberOfSlots, int maxWeight, Predicate<ItemStack> itemRestrictions) {
         super(prop);
-        this.numberOfSlots = numberOfSlots;
-        this.maxWeight = maxWeight;
+        this.NUMBER_OF_SLOTS = numberOfSlots;
+        this.MAX_WEIGHT = maxWeight;
         this.CAN_ACCEPT_ITEM_FN = itemRestrictions;
     }
 
     @Override
-    public int getNumberOfSlots() {
-        return this.numberOfSlots;
+    public int getNUMBER_OF_SLOTS() {
+        return this.NUMBER_OF_SLOTS;
     }
 
     @Override
-    public int getMaxWeight() {
-        return this.maxWeight;
+    public int getMAX_WEIGHT() {
+        return this.MAX_WEIGHT;
     }
 
     @Override
     public float getFullnessDisplay(ItemStack pStack) {
-        return (float) InventoryHelper.getWeightOfBagContents(pStack) / ((float) maxWeight);
+        return (float) InventoryHelper.getWeightOfBagContents(pStack) / ((float) MAX_WEIGHT);
     }
 
     @Override
@@ -50,39 +52,39 @@ public class ItemBag extends Item implements StorageItem {
     }
 
     @Override
-    public boolean overrideStackedOnOther(ItemStack bundle, Slot slot, ClickAction action, Player player) {
+    public boolean overrideStackedOnOther(@NotNull ItemStack bundle, Slot slot, @NotNull ClickAction action, @NotNull Player player) {
         if(!this.canBagTakeItem(slot.getItem()))
             return false;
-        return InventoryHelper.bagItemStackedOnSlot(bundle, slot, action, player, this.maxWeight, this.numberOfSlots);
+        return InventoryHelper.bagItemStackedOnSlot(bundle, slot, action, player, this.MAX_WEIGHT, this.NUMBER_OF_SLOTS);
     }
 
     @Override
-    public boolean overrideOtherStackedOnMe(ItemStack bundle, ItemStack itemIn, Slot slot, ClickAction action,
-                                            Player player, SlotAccess slotAccess) {
+    public boolean overrideOtherStackedOnMe(@NotNull ItemStack bundle, @NotNull ItemStack itemIn, @NotNull Slot slot, @NotNull ClickAction action,
+                                            @NotNull Player player, @NotNull SlotAccess slotAccess) {
         if(!itemIn.isEmpty() && !this.canBagTakeItem(itemIn))
             return false;
-        return InventoryHelper.itemStackedOnBag(bundle, itemIn, slot, action, player, slotAccess, this.maxWeight, this.numberOfSlots);
+        return InventoryHelper.itemStackedOnBag(bundle, itemIn, slot, action, player, slotAccess, this.MAX_WEIGHT, this.NUMBER_OF_SLOTS);
     }
 
     @Override
-    public Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
-        return InventoryHelper.getToolTipImage(stack, this.numberOfSlots, this.maxWeight);
+    public @NotNull Optional<TooltipComponent> getTooltipImage(@NotNull ItemStack stack) {
+        return InventoryHelper.getToolTipImage(stack, this.NUMBER_OF_SLOTS, this.MAX_WEIGHT);
     }
 
     /**
      * allows items to add custom lines of information to the mouseover description
      */
     @Override
-    public void appendHoverText(ItemStack pStack, Level pLevel, List<Component> pTooltipComponents,
-                                TooltipFlag pIsAdvanced) {
-        InventoryHelper.addHoverText(pStack, pTooltipComponents, this.maxWeight);
+    public void appendHoverText(@NotNull ItemStack pStack, Level pLevel, @NotNull List<Component> pTooltipComponents,
+                                @NotNull TooltipFlag pIsAdvanced) {
+        InventoryHelper.addHoverText(pStack, pTooltipComponents, this.MAX_WEIGHT);
     }
 
     /**
      * Called to trigger the item's "innate" right click behavior.
      */
     @Override
-    public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
+    public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level pLevel, Player pPlayer, @NotNull InteractionHand pUsedHand) {
         ItemStack itemstack = pPlayer.getItemInHand(pUsedHand);
         if (InventoryHelper.dropContents(itemstack, pPlayer)) {
             InventoryHelper.playDropContentsSound(pPlayer);
@@ -94,17 +96,17 @@ public class ItemBag extends Item implements StorageItem {
     }
 
     @Override
-    public boolean isBarVisible(ItemStack pStack) {
+    public boolean isBarVisible(@NotNull ItemStack pStack) {
         return InventoryHelper.isFullnessBarVisible(pStack);
     }
 
     @Override
-    public int getBarWidth(ItemStack pStack) {
-        return InventoryHelper.getFullnessBarWidth(pStack, this.maxWeight);
+    public int getBarWidth(@NotNull ItemStack pStack) {
+        return InventoryHelper.getFullnessBarWidth(pStack, this.MAX_WEIGHT);
     }
 
     @Override
-    public int getBarColor(ItemStack pStack) {
+    public int getBarColor(@NotNull ItemStack pStack) {
         return InventoryHelper.getFullnessBarColor(pStack);
     }
 

@@ -2,7 +2,6 @@ package io.github.epats.rottentothestore.client.event;
 
 import io.github.epats.rottentothestore.RottenToTheStore;
 import io.github.epats.rottentothestore.client.WearableStorageLayer;
-import io.github.epats.rottentothestore.client.WearableStorageModel;
 import io.github.epats.rottentothestore.client.screen.ClientCustomBundleTooltip;
 import io.github.epats.rottentothestore.common.inventory.tooltip.CustomBundleTooltip;
 import net.minecraft.client.renderer.entity.ZombieRenderer;

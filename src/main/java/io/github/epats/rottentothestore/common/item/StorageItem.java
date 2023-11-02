@@ -5,13 +5,13 @@ import net.minecraft.world.item.ItemStack;
 
 public interface StorageItem {
 
-    int getNumberOfSlots();
+    int getNUMBER_OF_SLOTS();
 
-    int getMaxWeight() ;
+    int getMAX_WEIGHT() ;
 
     boolean canBagTakeItem(ItemStack stackToInsert);
 
     default float getFullnessDisplay(ItemStack bagStack) {
-        return (float) InventoryHelper.getWeightOfBagContents(bagStack) / ((float) getMaxWeight());
+        return (float) InventoryHelper.getWeightOfBagContents(bagStack) / ((float) getMAX_WEIGHT());
     }
 }

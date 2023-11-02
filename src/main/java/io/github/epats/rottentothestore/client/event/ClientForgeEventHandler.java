@@ -2,10 +2,8 @@ package io.github.epats.rottentothestore.client.event;
 
 import io.github.epats.rottentothestore.RottenToTheStore;
 import io.github.epats.rottentothestore.common.ItemRegistry;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
